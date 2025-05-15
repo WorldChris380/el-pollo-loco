@@ -1,11 +1,12 @@
 class World {
-    character = new Character();
+  character = new Character();
   background = level1.background;
   clouds = level1.clouds;
   enemies = level1.enemies;
   ctx;
   canvas;
   camera_x = 0;
+  level = level1;
 
   constructor(canvas) {
     this.ctx = canvas.getContext("2d");
@@ -24,10 +25,10 @@ class World {
 
     this.ctx.translate(this.camera_x, 0);
 
-    this.addObjectsToCanvas(this.background);
-    this.addObjectsToCanvas(this.clouds);
+    this.addObjectsToCanvas(this.level.background);
+    this.addObjectsToCanvas(this.level.clouds);
     this.addToCanvas(this.character);
-    this.addObjectsToCanvas(this.enemies);
+    this.addObjectsToCanvas(this.level.enemies);
 
     this.ctx.translate(-this.camera_x, 0);
 
@@ -39,7 +40,7 @@ class World {
   }
 
   addObjectsToCanvas(objects) {
-    objects.forEach((Object) => {
+    objects.forEach(Object => {
       this.addToCanvas(Object);
     });
   }
