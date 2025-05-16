@@ -1,14 +1,9 @@
-class MoveableObject {
-  x = 120;
-  y = 275;
-  img;
-  height = 150;
-  width = 100;
-  images = [];
-  currentImage = 0;
+class MoveableObject extends DrawableObject {
   otherDirection = false;
   speedY = 0;
   acceleration = 1;
+  energy = 100;
+  lastHit = 0;
 
   applyGravity() {
     setInterval(() => {
@@ -23,17 +18,34 @@ class MoveableObject {
     return this.y < 150;
   }
 
-  loadImage(path) {
-    this.img = new Image();
-    this.img.src = path;
+  isColliding(moveableObject) {
+    return (
+      this.x + this.width > moveableObject.x &&
+      this.y + this.height > moveableObject.y &&
+      this.x < moveableObject.x &&
+      this.y < moveableObject.y + moveableObject.height
+    );
   }
 
-  loadImages(arr) {
-    arr.forEach((path) => {
-      let img = new Image();
-      img.src = path;
-      this.images[path] = img;
-    });
+  hit() {
+    this.energy -= 5;
+    {
+      if (this.energy < 0) {
+        this.energy = 0;
+      } else {
+        this.lastHit = new Date().getTime();
+      }
+    }
+  }
+
+  isDead() {
+    return this.energy == 0;
+  }
+
+  isHurt() {
+    let timepassed = new Date().getTime() - this.lastHit;
+    timepassed = timepassed / 1000;
+    return timepassed < 1;
   }
 
   moveLeft() {
@@ -47,8 +59,9 @@ class MoveableObject {
   jump() {
     this.speedY = 20;
   }
+
   playAnimation(images) {
-    let i = this.currentImage % this.IMAGES_WALKING.length;
+    let i = this.currentImage % images.length;
     let path = images[i];
     this.img = this.images[path];
     this.currentImage++;
