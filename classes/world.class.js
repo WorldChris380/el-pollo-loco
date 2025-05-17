@@ -8,6 +8,7 @@ class World {
   camera_x = 0;
   level = level1;
   statusBar = new StatusBar();
+  throwableObjects = [];
 
   constructor(canvas) {
     this.ctx = canvas.getContext("2d");
@@ -15,11 +16,28 @@ class World {
     this.keyboard = keyboard;
     this.draw();
     this.setWorld();
-    this.checkCollisions();
+    this.run();
   }
 
   setWorld() {
     this.character.world = this;
+  }
+
+  run() {
+    setInterval(() => {
+      this.checkCollisions();
+      this.checkThrowObjects();
+    }, 200);
+  }
+
+  checkThrowObjects() {
+    if (this.keyboard.ENTER) {
+      let bottle = new ThrowableObject(
+        this.character.x + 100,
+        this.character.y + 100
+      );
+      this.throwableObjects.push(bottle);
+    }
   }
 
   checkCollisions() {
@@ -27,6 +45,7 @@ class World {
       this.level.enemies.forEach((enemy) => {
         if (this.character.isColliding(enemy)) {
           this.character.hit();
+          this.statusBar.setPercentage(this.character.energy);
         }
       });
     }, 200);
@@ -38,10 +57,17 @@ class World {
     this.ctx.translate(this.camera_x, 0);
 
     this.addObjectsToCanvas(this.level.background);
+    this.ctx.translate(-this.camera_x, 0);
+
+    // Space for fixed objects
     this.addObjectsToCanvas(this.level.clouds);
     this.addToCanvas(this.statusBar);
+
+    this.ctx.translate(this.camera_x, 0);
+
     this.addToCanvas(this.character);
     this.addObjectsToCanvas(this.level.enemies);
+    this.addObjectsToCanvas(this.throwableObjects);
 
     this.ctx.translate(-this.camera_x, 0);
 
