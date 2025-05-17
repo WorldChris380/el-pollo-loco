@@ -8,6 +8,9 @@ class World {
   camera_x = 0;
   level = level1;
   statusBar = new StatusBar();
+  statusBarCoins = new StatusBarCoins();
+  statusBarBottles = new StatusBarBottles();
+  bottlesOnGround = [];
   throwableObjects = [];
 
   constructor(canvas) {
@@ -17,6 +20,7 @@ class World {
     this.draw();
     this.setWorld();
     this.run();
+    this.createBottlesOnGround();
   }
 
   setWorld() {
@@ -51,20 +55,29 @@ class World {
     }, 200);
   }
 
+  createBottlesOnGround() {
+    for (let i = 0; i < 10; i++) {
+      let bottle = new BottlesGround();
+      this.bottlesOnGround.push(bottle);
+    }
+  }
+
   draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
     this.ctx.translate(this.camera_x, 0);
-
     this.addObjectsToCanvas(this.level.background);
     this.ctx.translate(-this.camera_x, 0);
 
     // Space for fixed objects
     this.addObjectsToCanvas(this.level.clouds);
     this.addToCanvas(this.statusBar);
+    this.addToCanvas(this.statusBarCoins);
+    this.addToCanvas(this.statusBarBottles);
 
     this.ctx.translate(this.camera_x, 0);
 
+    // Space for moving objects
+    this.addObjectsToCanvas(this.bottlesOnGround);
     this.addToCanvas(this.character);
     this.addObjectsToCanvas(this.level.enemies);
     this.addObjectsToCanvas(this.throwableObjects);
