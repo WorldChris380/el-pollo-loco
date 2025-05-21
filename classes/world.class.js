@@ -32,7 +32,7 @@ class World {
     setInterval(() => {
       this.checkCollisions();
       this.checkThrowObjects();
-    }, 200);
+    }, 180);
   }
 
   checkThrowObjects() {
@@ -42,7 +42,8 @@ class World {
         this.statusBarBottles.setAmount(this.collectedBottles);
         let bottle = new ThrowableObject(
           this.character.x + 100,
-          this.character.y + 100
+          this.character.y + 100,
+          this.character.otherDirection
         );
         this.throwableObjects.push(bottle);
       }
@@ -120,7 +121,7 @@ class World {
     });
   }
 
-  addToCanvas(moveableObject) {
+  addToCanvas(moveableObject, bottle) {
     if (moveableObject.otherDirection) {
       this.flipImage(moveableObject);
     }
@@ -146,6 +147,7 @@ class World {
     this.ctx.scale(-1, 1);
     moveableObject.x = moveableObject.x * -1;
   }
+
   flipImageBack(moveableObject) {
     this.ctx.restore();
     moveableObject.x = moveableObject.x * -1;
