@@ -13,6 +13,7 @@ class World {
   bottlesOnGround = [];
   throwableObjects = [];
   collectedBottles = 0;
+  coins = [];
 
   constructor(canvas) {
     this.ctx = canvas.getContext("2d");
@@ -22,6 +23,7 @@ class World {
     this.setWorld();
     this.run();
     this.createBottlesOnGround();
+    this.createCoins();
   }
 
   setWorld() {
@@ -86,6 +88,12 @@ class World {
     }
   }
 
+  createCoins() {
+    for (let i = 0; i < 10; i++) {let coin = new Coins();
+      this.coins.push(coin);
+    }
+  }
+
   draw() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.translate(this.camera_x, 0);
@@ -102,6 +110,7 @@ class World {
 
     // Space for moving objects
     this.addObjectsToCanvas(this.bottlesOnGround);
+    this.addObjectsToCanvas(this.coins);
     this.addToCanvas(this.character);
     this.addObjectsToCanvas(this.level.enemies);
     this.addObjectsToCanvas(this.throwableObjects);

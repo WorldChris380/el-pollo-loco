@@ -12,12 +12,7 @@ class BottlesGround extends DrawableObject {
     this.height = 70;
     this.width = 80;
     this.setAmountOfBottles(this.amountOfBottlesOnGround);
-    // if (checkCollisions()) {
-    //   this.removeBottle;
-    // }
   }
-
-  removeBottle() {}
 
   setAmountOfBottles(amountOfBottlesOnGround) {
     this.amountOfBottlesOnGround = amountOfBottlesOnGround;
