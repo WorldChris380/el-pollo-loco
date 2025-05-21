@@ -37,11 +37,15 @@ class World {
 
   checkThrowObjects() {
     if (this.keyboard.ENTER) {
-      let bottle = new ThrowableObject(
-        this.character.x + 100,
-        this.character.y + 100
-      );
-      this.throwableObjects.push(bottle);
+      if (this.collectedBottles > 0) {
+        this.collectedBottles--;
+        this.statusBarBottles.setAmount(this.collectedBottles);
+        let bottle = new ThrowableObject(
+          this.character.x + 100,
+          this.character.y + 100
+        );
+        this.throwableObjects.push(bottle);
+      }
     }
   }
 
@@ -55,6 +59,10 @@ class World {
         }
       }
     }
+  }
+
+  bottlesAvailable() {
+    return this.collectedBottles;
   }
 
   checkCollisions() {

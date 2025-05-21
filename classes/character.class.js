@@ -38,7 +38,7 @@ class Character extends MoveableObject {
 
   speed = 10;
   world;
-
+  
   constructor() {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
     this.loadImages(this.IMAGES_WALKING);
@@ -73,13 +73,9 @@ class Character extends MoveableObject {
     setInterval(() => {
       if (this.isDead()) {
         this.playAnimation(this.IMAGES_DEAD);
-      }
-
-      else if (this.isHurt()) {
+      } else if (this.isHurt()) {
         this.playAnimation(this.IMAGES_HURT);
-      }
-
-      else if (this.isAboveGround()) {
+      } else if (this.isAboveGround()) {
         this.playAnimation(this.IMAGES_JUMPING);
       } else {
         if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
