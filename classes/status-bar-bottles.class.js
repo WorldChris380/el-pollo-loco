@@ -8,28 +8,33 @@ class StatusBarBottles extends DrawableObject {
     "img/7_statusbars/1_statusbar/3_statusbar_bottle/blue/100.png",
   ];
 
-  amountOfBottlesOnGround = DrawableObject.prototype.amountOfBottlesOnGround;
-
   constructor() {
     super();
     this.loadImages(this.IMAGES_BOTTLES);
-    this.img  = this.images[this.IMAGES_BOTTLES[0]];
+    this.img = this.images[this.IMAGES_BOTTLES[0]];
     this.x = 30;
     this.y = 100;
     this.height = 50;
     this.width = 200;
+    this.setAmount(0);
+  }
+
+  setAmount(amount) {
+    this.amountOfBottlesOnGround = amount;
+    let imagePath = this.IMAGES_BOTTLES[this.resolveImage()];
+    this.img = this.images[imagePath];
   }
 
   resolveImage() {
-    if (this.amountOfBottlesOnGround == 100) {
+    if (this.amountOfBottlesOnGround == 10) {
       return 5;
-    } else if (this.amountOfBottlesOnGround > 80) {
+    } else if (this.amountOfBottlesOnGround >= 8) {
       return 4;
-    } else if (this.amountOfBottlesOnGround > 60) {
+    } else if (this.amountOfBottlesOnGround >= 6) {
       return 3;
-    } else if (this.amountOfBottlesOnGround > 40) {
+    } else if (this.amountOfBottlesOnGround >= 4) {
       return 2;
-    } else if (this.amountOfBottlesOnGround > 20) {
+    } else if (this.amountOfBottlesOnGround >= 2) {
       return 1;
     } else {
       return 0;

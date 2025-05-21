@@ -12,6 +12,7 @@ class World {
   statusBarBottles = new StatusBarBottles();
   bottlesOnGround = [];
   throwableObjects = [];
+  collectedBottles = 0;
 
   constructor(canvas) {
     this.ctx = canvas.getContext("2d");
@@ -44,6 +45,18 @@ class World {
     }
   }
 
+  collidingWithBottles() {
+    if (this.bottlesOnGround.length > 0) {
+      for (let i = this.bottlesOnGround.length - 1; i >= 0; i--) {
+        if (this.character.isCollidingWithDrawable(this.bottlesOnGround[i])) {
+          this.bottlesOnGround.splice(i, 1);
+          this.collectedBottles++;
+          this.statusBarBottles.setAmount(this.collectedBottles);
+        }
+      }
+    }
+  }
+
   checkCollisions() {
     setInterval(() => {
       this.level.enemies.forEach((enemy) => {
@@ -51,8 +64,10 @@ class World {
           this.character.hit();
           this.statusBar.setPercentage(this.character.energy);
         }
-      });
-    }, 200);
+        this.collidingWithBottles();
+      }),
+        200;
+    });
   }
 
   createBottlesOnGround() {

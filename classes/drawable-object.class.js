@@ -6,6 +6,7 @@ class DrawableObject {
   height = 150;
   width = 100;
   currentImage = 0;
+  amountOfBottlesOnGround = 10;
 
   loadImage(path) {
     this.img = new Image();
@@ -24,6 +25,15 @@ class DrawableObject {
       ctx.rect(this.x, this.y, this.width, this.height);
       ctx.stroke();
     }
+  }
+
+  isCollidingWithDrawable(drawableObject) {
+    return (
+      this.x + this.width > drawableObject.x &&
+      this.y + this.height > drawableObject.y &&
+      this.x < drawableObject.x &&
+      this.y < drawableObject.y + drawableObject.height
+    );
   }
 
   loadImages(arr) {

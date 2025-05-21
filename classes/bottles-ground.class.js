@@ -6,20 +6,25 @@ class BottlesGround extends DrawableObject {
 
   constructor() {
     super();
-    this.amountOfBottlesOnGround = 10;
     this.loadImages(this.IMAGES_BOTTLES_ON_GROUND);
-    this.x = 100 + Math.random() * 1000;
+    this.x = 250 + Math.random() * 1000;
     this.y = 355;
     this.height = 70;
     this.width = 80;
     this.setAmountOfBottles(this.amountOfBottlesOnGround);
+    // if (checkCollisions()) {
+    //   this.removeBottle;
+    // }
   }
+
+  removeBottle() {}
 
   setAmountOfBottles(amountOfBottlesOnGround) {
     this.amountOfBottlesOnGround = amountOfBottlesOnGround;
-    let imagePath = this.IMAGES_BOTTLES_ON_GROUND[0];
+    let imagePath =
+      this.IMAGES_BOTTLES_ON_GROUND[
+        Math.floor(Math.random() * this.IMAGES_BOTTLES_ON_GROUND.length)
+      ];
     this.img = this.images[imagePath];
   }
-
-  
 }
