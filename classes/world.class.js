@@ -1,5 +1,5 @@
 class World {
-  character = new Character();
+  character;
   background = level1.background;
   clouds = level1.clouds;
   enemies = level1.enemies;
@@ -10,12 +10,15 @@ class World {
   statusBar = new StatusBar();
   statusBarCoins = new StatusBarCoins();
   statusBarBottles = new StatusBarBottles();
+  statusBarEndboss = new StatusBarEndboss();
   bottlesOnGround = [];
   throwableObjects = [];
   collectedBottles = 0;
   coins = [];
+  collectedCoins = 0;
 
   constructor(canvas) {
+    this.character = new Character();
     this.ctx = canvas.getContext("2d");
     this.canvas = canvas;
     this.keyboard = keyboard;
@@ -24,6 +27,9 @@ class World {
     this.run();
     this.createBottlesOnGround();
     this.createCoins();
+    this.endboss = new Endboss(this);
+    this.level.enemies.push(this.endboss);
+    console.log(this.level.enemies);
   }
 
   setWorld() {
@@ -33,6 +39,7 @@ class World {
   run() {
     setInterval(() => {
       this.checkCollisions();
+      this.checkBottleHitsEndboss();
       this.checkThrowObjects();
     }, 180);
   }
@@ -42,9 +49,11 @@ class World {
       if (this.collectedBottles > 0) {
         this.collectedBottles--;
         this.statusBarBottles.setAmount(this.collectedBottles);
+        let offsetX = this.character.otherDirection ? -50 : 50;
+        
         let bottle = new ThrowableObject(
-          this.character.x + 100,
-          this.character.y + 100,
+          this.character.x + offsetX,
+          this.character.y + this.character.height - 70,
           this.character.otherDirection
         );
         this.throwableObjects.push(bottle);
@@ -64,6 +73,44 @@ class World {
     }
   }
 
+  collidingWithCoins() {
+    if (this.coins.length > 0) {
+      for (let i = this.coins.length - 1; i >= 0; i--) {
+        if (this.character.isCollidingWithDrawable(this.coins[i])) {
+          this.coins.splice(i, 1);
+          this.collectedCoins++;
+          this.statusBarCoins.setAmountOfCoins(this.collectedCoins);
+        }
+      }
+    }
+  }
+
+  checkBottleHitsEndboss() {
+    this.throwableObjects.forEach((bottle) => {
+      if (
+        this.endboss &&
+        this.isColliding(bottle, this.endboss) &&
+        !this.endboss.isDead &&
+        !bottle.isBroken
+      ) {
+        console.log("Kollision: Bottle trifft Endboss!");
+        this.endboss.hit();
+        this.statusBarEndboss.setPercentage(this.endboss.energy);
+        bottle.break();
+      }
+    });
+  }
+
+  // Hilfsfunktion für generische Kollision
+  isColliding(obj1, obj2) {
+    return (
+      obj1.x + obj1.width > obj2.x &&
+      obj1.y + obj1.height > obj2.y &&
+      obj1.x < obj2.x + obj2.width &&
+      obj1.y < obj2.y + obj2.height
+    );
+  }
+
   bottlesAvailable() {
     return this.collectedBottles;
   }
@@ -72,15 +119,21 @@ class World {
     setInterval(() => {
       this.level.enemies.forEach((enemy) => {
         if (this.character.isColliding(enemy)) {
-          this.character.hit();
-          this.statusBar.setPercentage(this.character.energy);
+          if (enemy.isDead) {
+            return;
+          }
+          if (this.character.isFallingOn(enemy)) {
+            enemy.die();
+          } else {
+            this.character.hit();
+            this.statusBar.setPercentage(this.character.energy);
+          }
         }
-        this.collidingWithBottles();
-      }),
-        200;
-    });
+      });
+      this.collidingWithBottles();
+      this.collidingWithCoins();
+    }, 200);
   }
-
   createBottlesOnGround() {
     for (let i = 0; i < 10; i++) {
       let bottle = new BottlesGround();
@@ -89,7 +142,8 @@ class World {
   }
 
   createCoins() {
-    for (let i = 0; i < 10; i++) {let coin = new Coins();
+    for (let i = 0; i < 10; i++) {
+      let coin = new Coins();
       this.coins.push(coin);
     }
   }
@@ -105,7 +159,7 @@ class World {
     this.addToCanvas(this.statusBar);
     this.addToCanvas(this.statusBarCoins);
     this.addToCanvas(this.statusBarBottles);
-
+    this.addToCanvas(this.statusBarEndboss);
     this.ctx.translate(this.camera_x, 0);
 
     // Space for moving objects
@@ -114,7 +168,6 @@ class World {
     this.addToCanvas(this.character);
     this.addObjectsToCanvas(this.level.enemies);
     this.addObjectsToCanvas(this.throwableObjects);
-
     this.ctx.translate(-this.camera_x, 0);
 
     // Draw wird immer wieder aufgerufen

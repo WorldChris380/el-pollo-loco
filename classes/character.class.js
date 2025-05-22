@@ -38,7 +38,7 @@ class Character extends MoveableObject {
 
   speed = 10;
   world;
-  
+
   constructor() {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
     this.loadImages(this.IMAGES_WALKING);
@@ -50,6 +50,12 @@ class Character extends MoveableObject {
     this.height = 270;
     this.y = 0;
     this.applyGravity();
+  }
+
+  isFallingOn(enemy) {
+    return (
+      this.speedY < 0 && this.y + this.height - enemy.y < 30 && this.y < enemy.y
+    );
   }
 
   animate() {

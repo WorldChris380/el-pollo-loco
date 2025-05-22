@@ -27,15 +27,15 @@ class StatusBarCoins extends DrawableObject {
   }
 
   resolveImage() {
-    if (this.amountOfCoins > 90) {
+    if (this.amountOfCoins > 9) {
       return 5;
-    } else if (this.amountOfCoins > 80) {
+    } else if (this.amountOfCoins > 7) {
       return 4;
-    } else if (this.percentage > 60) {
+    } else if (this.amountOfCoins > 5) {
       return 3;
-    } else if (this.amountOfCoins > 40) {
+    } else if (this.amountOfCoins > 3) {
       return 2;
-    } else if (this.amountOfCoins > 20) {
+    } else if (this.amountOfCoins > 1) {
       return 1;
     } else {
       return 0;
