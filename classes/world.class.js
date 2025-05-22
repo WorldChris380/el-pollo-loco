@@ -50,7 +50,7 @@ class World {
         this.collectedBottles--;
         this.statusBarBottles.setAmount(this.collectedBottles);
         let offsetX = this.character.otherDirection ? -50 : 50;
-        
+
         let bottle = new ThrowableObject(
           this.character.x + offsetX,
           this.character.y + this.character.height - 70,
@@ -153,15 +153,13 @@ class World {
     this.ctx.translate(this.camera_x, 0);
     this.addObjectsToCanvas(this.level.background);
     this.ctx.translate(-this.camera_x, 0);
-
-    // Space for fixed objects
+    this.fullscreen();
     this.addObjectsToCanvas(this.level.clouds);
     this.addToCanvas(this.statusBar);
     this.addToCanvas(this.statusBarCoins);
     this.addToCanvas(this.statusBarBottles);
     this.addToCanvas(this.statusBarEndboss);
     this.ctx.translate(this.camera_x, 0);
-
     // Space for moving objects
     this.addObjectsToCanvas(this.bottlesOnGround);
     this.addObjectsToCanvas(this.coins);
@@ -169,12 +167,30 @@ class World {
     this.addObjectsToCanvas(this.level.enemies);
     this.addObjectsToCanvas(this.throwableObjects);
     this.ctx.translate(-this.camera_x, 0);
-
     // Draw wird immer wieder aufgerufen
     let self = this;
     requestAnimationFrame(function () {
       self.draw();
     });
+  }
+
+  fullscreen() {
+    this.ctx.save();
+    this.ctx.fillStyle = "rgba(0, 0, 255, 0.7)";
+    this.ctx.fillRect(
+      this.canvas.width - 160,
+      this.canvas.height - 60,
+      150,
+      40
+    );
+    this.ctx.fillStyle = "white";
+    this.ctx.font = "20px Arial";
+    this.ctx.fillText(
+      "Fullscreen",
+      this.canvas.width - 140,
+      this.canvas.height - 32
+    );
+    this.ctx.restore();
   }
 
   addObjectsToCanvas(objects) {

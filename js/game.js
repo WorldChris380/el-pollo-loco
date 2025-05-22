@@ -6,6 +6,43 @@ let keyboard = new Keyboard();
 function init() {
   canvas = document.getElementById("canvas");
   world = new World(canvas, keyboard);
+
+  let canvasElement = document.getElementById("canvas");
+  canvasElement.addEventListener("click", function (event) {
+    const rect = canvasElement.getBoundingClientRect();
+
+    const x = ((event.clientX - rect.left) / rect.width) * canvasElement.width;
+    const y = ((event.clientY - rect.top) / rect.height) * canvasElement.height;
+
+    if (
+      x >= canvasElement.width - 200 &&
+      x <= canvasElement.width - 10 &&
+      y >= canvasElement.height - 60 &&
+      y <= canvasElement.height - 20
+    ) {
+      if (
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement
+      ) {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen();
+        }
+      } else {
+        if (canvasElement.requestFullscreen) {
+          canvasElement.requestFullscreen();
+        } else if (canvasElement.webkitRequestFullscreen) {
+          canvasElement.webkitRequestFullscreen();
+        } else if (canvasElement.msRequestFullscreen) {
+          canvasElement.msRequestFullscreen();
+        }
+      }
+    }
+  });
 }
 
 window.addEventListener("keydown", (event) => {
