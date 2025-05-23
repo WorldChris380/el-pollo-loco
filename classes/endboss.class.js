@@ -41,7 +41,7 @@ class Endboss extends MoveableObject {
   }
 
   hit() {
-    this.energy -= 20;
+    this.energy -= 5;
     if (this.energy < 0) {
       this.energy = 0;
       this.isDead = true;
@@ -50,15 +50,31 @@ class Endboss extends MoveableObject {
 
   moveEndbossLeft() {
     this.x -= this.speed;
+    if (soundOn && endbossWalkAudio.paused) {
+      endbossWalkAudio.currentTime = 0;
+      endbossWalkAudio.play();
+    }
+  }
+
+  stopEndbossWalk() {
+    if (!endbossWalkAudio.paused) {
+      endbossWalkAudio.pause();
+      endbossWalkAudio.currentTime = 0;
+    }
   }
 
   animate() {
     let i = 0;
     setInterval(() => {
+      if (this.isDead) {
+        this.stopEndbossWalk();
+        return;
+      }
       if (this.world.character.x > 1000) {
-        this.moveLeft();
+        this.moveEndbossLeft();
         this.playAnimation(this.IMAGES_ATTACK);
       } else {
+        this.stopEndbossWalk();
         this.playAnimation(this.IMAGES_WALKING);
       }
       i++;
@@ -68,7 +84,7 @@ class Endboss extends MoveableObject {
       }
     }, 200);
   }
-  
+
   drawFrame(ctx) {
     ctx.save();
     ctx.beginPath();

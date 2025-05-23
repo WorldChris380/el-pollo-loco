@@ -6,15 +6,74 @@ body {
 }
 
 canvas {
-  background-color: black;
   display: block;
+}
+
+#startscreen {
+  margin-top: 270px;
+}
+
+#startscreen-img {
+  width: 720px;
+  height: 480px;
+}
+
+#startgame-btn {
+  border: none;
+  border-radius: 10px;
+  margin-top: -490px;
+  background: #a0220a;
+  color: white;
+  transition: background 0.2s;
+}
+
+#startgame-btn:hover {
+  background: #754c24;
+}
+
+#sub-buttons {
+  position: absolute;
+  top: 555px;
+  z-index: 15;
+}
+
+#legal-overlay,
+#tutorial-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 20;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+#rotate-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgb(0, 0, 0);
+  color: white;
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  font-size: 2rem;
+  text-align: center;
 }
 
 @media only screen and (max-width: 720px) {
   canvas {
     width: 100%;
   }
-  
+
   h1 {
     display: none;
   }
@@ -27,5 +86,11 @@ canvas {
 
   h1 {
     display: none;
+  }
+}
+
+@media (max-height: 800px) {
+  #startgame-btn {
+    margin-top: -400px;
   }
 }

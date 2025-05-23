@@ -37,17 +37,21 @@ class ThrowableObject extends MoveableObject {
     this.speed = 0;
     this.speedY = 0;
     this.brokenAnimationIndex = 0;
+    if (soundOn) {
+      bottleBreakAudio.currentTime = 0;
+      bottleBreakAudio.play();
+    }
     this.playBrokenAnimation();
   }
 
   playBrokenAnimation() {
     let interval = setInterval(() => {
       if (this.brokenAnimationIndex < this.IMAGE_BOTTLE_BROKEN.length) {
-        this.img = this.images[this.IMAGE_BOTTLE_BROKEN[this.brokenAnimationIndex]];
+        this.img =
+          this.images[this.IMAGE_BOTTLE_BROKEN[this.brokenAnimationIndex]];
         this.brokenAnimationIndex++;
       } else {
         clearInterval(interval);
-        // Nach Animation aus dem Array entfernen
         if (this.world && this.world.throwableObjects) {
           let idx = this.world.throwableObjects.indexOf(this);
           if (idx > -1) this.world.throwableObjects.splice(idx, 1);
@@ -66,7 +70,6 @@ class ThrowableObject extends MoveableObject {
         } else {
           this.x += 10;
         }
-        // Prüfe auf Boden-Kontakt (z.B. y >= 355)
         if (this.y >= 355) {
           this.break();
         }

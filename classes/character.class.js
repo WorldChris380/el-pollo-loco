@@ -20,15 +20,7 @@ class Character extends MoveableObject {
     "img/2_character_pepe/3_jump/J-39.png",
   ];
 
-  IMAGES_DEAD = [
-    "img/2_character_pepe/5_dead/D-51.png",
-    // "img/2_character_pepe/5_dead/D-52.png",
-    // "img/2_character_pepe/5_dead/D-53.png",
-    // "img/2_character_pepe/5_dead/D-54.png",
-    // "img/2_character_pepe/5_dead/D-55.png",
-    // "img/2_character_pepe/5_dead/D-56.png",
-    // "img/2_character_pepe/5_dead/D-57.png",
-  ];
+  IMAGES_DEAD = ["img/2_character_pepe/5_dead/D-51.png"];
 
   IMAGES_HURT = [
     "img/2_character_pepe/4_hurt/H-42.png",
@@ -38,6 +30,16 @@ class Character extends MoveableObject {
 
   speed = 10;
   world;
+
+  // Sound-Objekte
+  walkAudio = new Audio("audio/walk.wav");
+  jumpAudio = new Audio("audio/huch.wav");
+  hurtAudio = new Audio("audio/hurt.wav");
+
+  isWalking = false;
+  isJumping = false;
+  lastHurtTime = 0;
+  wasHurt = false;
 
   constructor() {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
@@ -50,6 +52,7 @@ class Character extends MoveableObject {
     this.height = 270;
     this.y = 0;
     this.applyGravity();
+    this.walkAudio.loop = true;
   }
 
   isFallingOn(enemy) {
@@ -60,25 +63,52 @@ class Character extends MoveableObject {
 
   animate() {
     setInterval(() => {
-      if (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) {
-        this.moveRight();
-        this.otherDirection = false;
-      }
-      if (this.world.keyboard.LEFT && this.x > 0) {
-        this.moveLeft();
-        this.otherDirection = true;
+      if (
+        (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) ||
+        (this.world.keyboard.LEFT && this.x > 0)
+      ) {
+        if (!this.isWalking) {
+          this.playWalkSound();
+        }
+        if (this.world.keyboard.RIGHT) {
+          this.moveRight();
+          this.otherDirection = false;
+        }
+        if (this.world.keyboard.LEFT) {
+          this.moveLeft();
+          this.otherDirection = true;
+        }
+      } else {
+        this.stopWalkSound();
       }
 
+      // JUMPING
       if (this.world.keyboard.UP && !this.isAboveGround()) {
+        if (!this.isJumping) {
+          this.playJumpSound();
+        }
         this.jump();
+      } else {
+        this.isJumping = false;
       }
 
       this.world.camera_x = -this.x + 100;
+
+      // Hurt-Status prüfen und Sound nur einmal abspielen
+      if (this.isHurt()) {
+        if (!this.wasHurt) {
+          this.playHurtSound();
+          this.wasHurt = true;
+        }
+      } else {
+        this.wasHurt = false;
+      }
     }, 5000 / 144);
 
     setInterval(() => {
       if (this.isDead()) {
         this.playAnimation(this.IMAGES_DEAD);
+        this.stopWalkSound();
       } else if (this.isHurt()) {
         this.playAnimation(this.IMAGES_HURT);
       } else if (this.isAboveGround()) {
@@ -89,5 +119,36 @@ class Character extends MoveableObject {
         }
       }
     }, 50);
+  }
+
+  playJumpSound() {
+    if (soundOn && !this.isJumping) {
+      this.isJumping = true;
+      this.jumpAudio.currentTime = 0;
+      this.jumpAudio.play();
+    }
+  }
+
+  stopWalkSound() {
+    if (!this.walkAudio.paused) {
+      this.walkAudio.pause();
+      this.walkAudio.currentTime = 0;
+      this.isWalking = false;
+    }
+  }
+
+  playHurtSound() {
+    if (soundOn) {
+      this.hurtAudio.currentTime = 0;
+      this.hurtAudio.play();
+    }
+  }
+
+  playWalkSound() {
+    if (soundOn && this.walkAudio.paused) {
+      this.walkAudio.currentTime = 0;
+      this.walkAudio.play();
+      this.isWalking = true;
+    }
   }
 }

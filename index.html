@@ -3,7 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="/img/2_character_pepe/1_idle/idle/I-1.png"
+      type="image/x-icon"
+    />
     <title>El Pollo Loco by Christian Böhme</title>
+
+    <!-- CSS -->
     <link rel="stylesheet" href="style.css" />
     <style>
       @font-face {
@@ -13,7 +20,6 @@
 
       body {
         font-family: "Zabars", Arial, Helvetica, sans-serif;
-        /* background-image: url("img/body-background.png"); */
         background-size: cover;
         background-repeat: no-repeat;
       }
@@ -45,10 +51,96 @@
     <script src="/levels/level1.js"></script>
 
     <!-- Vanilla JS -->
+    <script src="/js/screen-orientation.js"></script>
     <script src="/js/game.js"></script>
+    <script src="/js/audio.js"></script>
   </head>
-  <body onload="init()">
+  <body>
+    <div
+      id="startscreen"
+      style="
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+      "
+    >
+      <img
+        id="startscreen-img"
+        src="img/9_intro_outro_screens/start/startscreen_1.png"
+        alt="Startscreen"
+        style="max-width: 80vw; max-height: 60vh; margin-bottom: 40px"
+      />
+      <button
+        id="startgame-btn"
+        style="font-size: 2rem; padding: 20px 40px; cursor: pointer"
+      >
+        Start game
+      </button>
+    </div>
+
+    <!-- Legal Notice Overlay -->
+    <div
+      id="legal-overlay"
+      style="
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 20;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      "
+    >
+      <div
+        style="
+          background: white;
+          padding: 40px;
+          border-radius: 16px;
+
+          text-align: center;
+        "
+      >
+        <h2>Legal Notice</h2>
+        <a href="/datenschutz.html"></a>
+        <button
+          onclick="document.getElementById('legal-overlay').style.display='none'"
+          style="margin-top: 20px; padding: 10px 24px"
+        >
+          Close
+        </button>
+      </div>
+    </div>
     <h1>El Pollo Loco by Christian Böhme</h1>
     <canvas id="canvas" width="720" height="480"></canvas>
   </body>
+  <div
+    id="rotate-overlay"
+    style="
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.95);
+      color: white;
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      font-size: 2rem;
+      text-align: center;
+    "
+  >
+    <div>
+      <p>Turn your device.</p>
+    </div>
+  </div>
 </html>
