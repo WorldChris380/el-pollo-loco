@@ -11,24 +11,25 @@ let ctx;
 let world;
 let keyboard = new Keyboard();
 let soundOn = true;
-if (localStorage.getItem('soundOn') !== null) {
-  soundOn = localStorage.getItem('soundOn') === 'true';
+if (localStorage.getItem("soundOn") !== null) {
+  soundOn = localStorage.getItem("soundOn") === "true";
 }
 let gameAudio = new Audio("audio/game-sound.wav");
 gameAudio.loop = true;
+let startButtonArea = null;
+let showStartButton = true;
 
 /**
  * Initializes the game and shows the start screen.
  */
 window.onload = function () {
-  document.getElementById("startscreen").style.display = "flex";
-  document.getElementById("canvas").style.display = "none";
-  document.getElementById("startgame-btn")
-    .addEventListener("click", function () {
-      document.getElementById("startscreen").style.display = "none";
-      document.getElementById("canvas").style.display = "block";
-      init();
-    });
+  canvas = document.getElementById("canvas");
+  ctx = canvas.getContext("2d");
+  document.getElementById("startscreen").style.display = "none";
+  document.getElementById("canvas").style.display = "block";
+  showStartButton = true;
+  drawStartScreen();
+  canvas.addEventListener("click", handleCanvasClick);
 };
 
 /**
@@ -52,8 +53,8 @@ function init() {
  */
 function setupMobileCanvasControls(canvas) {
   if (!isMobile()) return;
-  canvas.addEventListener("touchstart", handleTouch, {passive: false});
-  canvas.addEventListener("touchend", handleTouchEnd, {passive: false});
+  canvas.addEventListener("touchstart", handleTouch, { passive: false });
+  canvas.addEventListener("touchend", handleTouchEnd, { passive: false });
 }
 
 /**
@@ -113,8 +114,10 @@ function toggleFullscreen(canvasElement) {
     else if (document.msExitFullscreen) document.msExitFullscreen();
   } else {
     if (canvasElement.requestFullscreen) canvasElement.requestFullscreen();
-    else if (canvasElement.webkitRequestFullscreen) canvasElement.webkitRequestFullscreen();
-    else if (canvasElement.msRequestFullscreen) canvasElement.msRequestFullscreen();
+    else if (canvasElement.webkitRequestFullscreen)
+      canvasElement.webkitRequestFullscreen();
+    else if (canvasElement.msRequestFullscreen)
+      canvasElement.msRequestFullscreen();
   }
 }
 
@@ -152,7 +155,9 @@ function addSubButtonClicks(canvasElement) {
     if (checkTutorialClose(x, y)) return;
     if (checkRestartButton(x, y)) return;
     if (!world || !world.subButtonAreas) return;
-    world.subButtonAreas.forEach((btn) => handleSubButton(btn, x, y, canvasElement));
+    world.subButtonAreas.forEach((btn) =>
+      handleSubButton(btn, x, y, canvasElement)
+    );
   });
 }
 
@@ -163,7 +168,12 @@ function addSubButtonClicks(canvasElement) {
 function checkTutorialClose(x, y) {
   if (world && world.showTutorial && world.tutorialCloseButton) {
     const btn = world.tutorialCloseButton;
-    if (x >= btn.x && x <= btn.x + btn.width && y >= btn.y && y <= btn.y + btn.height) {
+    if (
+      x >= btn.x &&
+      x <= btn.x + btn.width &&
+      y >= btn.y &&
+      y <= btn.y + btn.height
+    ) {
       world.showTutorial = false;
       return true;
     }
@@ -178,7 +188,12 @@ function checkTutorialClose(x, y) {
 function checkRestartButton(x, y) {
   if (world && world.restartButtonArea && world.character.energy === 0) {
     const btn = world.restartButtonArea;
-    if (x >= btn.x && x <= btn.x + btn.width && y >= btn.y && y <= btn.y + btn.height) {
+    if (
+      x >= btn.x &&
+      x <= btn.x + btn.width &&
+      y >= btn.y &&
+      y <= btn.y + btn.height
+    ) {
       restartGame();
       return true;
     }
@@ -191,7 +206,12 @@ function checkRestartButton(x, y) {
  * @private
  */
 function handleSubButton(btn, x, y, canvasElement) {
-  if (x >= btn.x && x <= btn.x + btn.width && y >= btn.y && y <= btn.y + btn.height) {
+  if (
+    x >= btn.x &&
+    x <= btn.x + btn.width &&
+    y >= btn.y &&
+    y <= btn.y + btn.height
+  ) {
     if (btn.key === "tutorial") world.showTutorial = true;
     if (btn.key === "legal") window.open("datenschutz.html", "_blank");
     if (btn.key === "sound") {
@@ -206,7 +226,7 @@ function handleSubButton(btn, x, y, canvasElement) {
  * Toggles sound on/off and saves the status in Local Storage.
  */
 function handleSoundToggle() {
-  localStorage.setItem('soundOn', soundOn);
+  localStorage.setItem("soundOn", soundOn);
   if (!soundOn) {
     gameAudio.pause();
     if (window.walkAudio) walkAudio.pause();
@@ -249,7 +269,8 @@ function restartGame() {
 window.addEventListener("keydown", (event) => {
   if (event.keyCode == 39 || event.keyCode == 68) keyboard.RIGHT = true;
   if (event.keyCode == 37 || event.keyCode == 65) keyboard.LEFT = true;
-  if (event.keyCode == 38 || event.keyCode == 87 || event.keyCode == 32) keyboard.UP = true;
+  if (event.keyCode == 38 || event.keyCode == 87 || event.keyCode == 32)
+    keyboard.UP = true;
   if (event.keyCode == 40 || event.keyCode == 83) keyboard.DOWN = true;
   if (event.keyCode == 13 || event.keyCode == 69) keyboard.ENTER = true;
 });
@@ -260,7 +281,8 @@ window.addEventListener("keydown", (event) => {
 window.addEventListener("keyup", (event) => {
   if (event.keyCode == 39 || event.keyCode == 68) keyboard.RIGHT = false;
   if (event.keyCode == 37 || event.keyCode == 65) keyboard.LEFT = false;
-  if (event.keyCode == 38 || event.keyCode == 87 || event.keyCode == 32) keyboard.UP = false;
+  if (event.keyCode == 38 || event.keyCode == 87 || event.keyCode == 32)
+    keyboard.UP = false;
   if (event.keyCode == 40 || event.keyCode == 83) keyboard.DOWN = false;
   if (event.keyCode == 13 || event.keyCode == 69) keyboard.ENTER = false;
 });
@@ -280,11 +302,27 @@ function handleTouch(e) {
     if (checkTutorialClose(x, y)) return;
     if (handleSubButtonsTouch(x, y)) return;
     if (checkRestartButton(x, y)) return;
-    if (typeof isFullscreenButton === "function" && isFullscreenButton(x, y, canvas)) {
+    if (
+      typeof isFullscreenButton === "function" &&
+      isFullscreenButton(x, y, canvas)
+    ) {
       toggleFullscreen(canvas);
       return;
     }
   }
+}
+
+/**
+ * Handles the end of a touch event for mobile controls.
+ * @param {TouchEvent} e
+ */
+function handleTouchEnd(e) {
+  // Optional: Set all pressedButtons/keyboard states to false
+  if (!world || !world.mobileButtons) return;
+  world.mobileButtons.forEach((btn) => {
+    world.pressedButtons[btn.key] = false;
+    keyboard[btn.key] = false;
+  });
 }
 
 /**
@@ -294,12 +332,7 @@ function handleTouch(e) {
 function handleMobileButtons(x, y) {
   let hit = false;
   world.mobileButtons.forEach((btn) => {
-    if (
-      x >= btn.x &&
-      x <= btn.x + btn.w &&
-      y >= btn.y &&
-      y <= btn.y + btn.h
-    ) {
+    if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
       world.pressedButtons[btn.key] = true;
       keyboard[btn.key] = true;
       hit = true;
@@ -333,4 +366,68 @@ function handleSubButtonsTouch(x, y) {
     }
   }
   return false;
+}
+
+/**
+ * Zeichnet den Start-Button im Canvas.
+ */
+function drawStartButton() {
+  if (!canvas || !ctx) return;
+  ctx.save();
+  ctx.globalAlpha = 0.95;
+  const btnWidth = 260;
+  const btnHeight = 60;
+  const btnX = canvas.width / 2 - btnWidth / 2;
+  const btnY = 40;
+  ctx.fillStyle = "#a0220a";
+  ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 32px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("Start game", canvas.width / 2, btnY + btnHeight / 2);
+  ctx.restore();
+  startButtonArea = { x: btnX, y: btnY, width: btnWidth, height: btnHeight };
+}
+
+/**
+ * Prüft, ob auf den Start-Button geklickt wurde.
+ */
+function handleCanvasClick(event) {
+  if (!showStartButton || !startButtonArea) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+  if (
+    x >= startButtonArea.x &&
+    x <= startButtonArea.x + startButtonArea.width &&
+    y >= startButtonArea.y &&
+    y <= startButtonArea.y + startButtonArea.height
+  ) {
+    showStartButton = false;
+    document.getElementById("startscreen").style.display = "none";
+    document.getElementById("canvas").style.display = "block";
+    init();
+  }
+}
+
+/**
+ * Zeichnet das Startscreen-Bild und den Button im Canvas.
+ */
+function drawStartScreen() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const img = new Image();
+  img.src = "img/9_intro_outro_screens/start/startscreen_1.png";
+  img.onload = function () {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    drawStartButton();
+  };
+  // Falls das Bild schon geladen ist
+  if (img.complete) {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    drawStartButton();
+  }
 }
