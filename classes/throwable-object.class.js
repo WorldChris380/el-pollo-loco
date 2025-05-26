@@ -1,3 +1,8 @@
+/**
+ * Represents a throwable object (bottle) in the game.
+ * @class
+ * @extends MoveableObject
+ */
 class ThrowableObject extends MoveableObject {
   IMAGES = [
     "img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png",
@@ -18,6 +23,13 @@ class ThrowableObject extends MoveableObject {
   isBroken = false;
   brokenAnimationIndex = 0;
 
+  /**
+   * Creates a new throwable object.
+   * @param {number} x - X position.
+   * @param {number} y - Y position.
+   * @param {boolean} otherDirection - Direction.
+   * @param {World} world - The game world.
+   */
   constructor(x, y, otherDirection, world) {
     super().loadImage(this.IMAGES[0]);
     this.loadImages(this.IMAGES);
@@ -31,6 +43,9 @@ class ThrowableObject extends MoveableObject {
     this.world = world;
   }
 
+  /**
+   * Breaks the bottle and plays animation/sound.
+   */
   break() {
     if (this.isBroken) return;
     this.isBroken = true;
@@ -44,6 +59,9 @@ class ThrowableObject extends MoveableObject {
     this.playBrokenAnimation();
   }
 
+  /**
+   * Plays the breaking animation and removes the object.
+   */
   playBrokenAnimation() {
     let interval = setInterval(() => {
       if (this.brokenAnimationIndex < this.IMAGE_BOTTLE_BROKEN.length) {
@@ -60,6 +78,9 @@ class ThrowableObject extends MoveableObject {
     }, 50);
   }
 
+  /**
+   * Throws the bottle and animates its trajectory.
+   */
   throw() {
     this.speedY = 30;
     this.applyGravity();

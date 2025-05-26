@@ -1,3 +1,7 @@
+/**
+ * Initializes and exports all audio objects for the game.
+ * Contains sound effects for walking, jumping, taking damage, game over, coins, endboss, and bottle breaking.
+ */
 const walkAudio = new Audio("audio/walk.wav");
 walkAudio.loop = true;
 const jumpAudio = new Audio("audio/huch.wav");

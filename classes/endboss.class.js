@@ -1,3 +1,8 @@
+/**
+ * Represents the endboss in the game.
+ * @class
+ * @extends MoveableObject
+ */
 class Endboss extends MoveableObject {
   height = 450;
   width = 300;
@@ -29,6 +34,10 @@ class Endboss extends MoveableObject {
     "img/4_enemie_boss_chicken/3_attack/G20.png",
   ];
 
+  /**
+   * Creates a new Endboss.
+   * @param {World} world - The current game world.
+   */
   constructor(world) {
     super().loadImage(this.IMAGES_WALKING[0]);
     this.loadImages(this.IMAGES_WALKING);
@@ -40,6 +49,9 @@ class Endboss extends MoveableObject {
     this.animate();
   }
 
+  /**
+   * Reduces the endboss's energy when hit.
+   */
   hit() {
     this.energy -= 5;
     if (this.energy < 0) {
@@ -48,6 +60,9 @@ class Endboss extends MoveableObject {
     }
   }
 
+  /**
+   * Moves the endboss to the left and plays sound if needed.
+   */
   moveEndbossLeft() {
     this.x -= this.speed;
     if (soundOn && endbossWalkAudio.paused) {
@@ -56,6 +71,9 @@ class Endboss extends MoveableObject {
     }
   }
 
+  /**
+   * Stops the endboss walk sound.
+   */
   stopEndbossWalk() {
     if (!endbossWalkAudio.paused) {
       endbossWalkAudio.pause();
@@ -63,6 +81,9 @@ class Endboss extends MoveableObject {
     }
   }
 
+  /**
+   * Animates the endboss (walking, attacking, dying).
+   */
   animate() {
     let i = 0;
     setInterval(() => {
@@ -85,6 +106,10 @@ class Endboss extends MoveableObject {
     }, 200);
   }
 
+  /**
+   * Draws a frame around the endboss.
+   * @param {CanvasRenderingContext2D} ctx
+   */
   drawFrame(ctx) {
     ctx.save();
     ctx.beginPath();

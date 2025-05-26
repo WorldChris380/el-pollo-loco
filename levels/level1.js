@@ -1,8 +1,15 @@
+/**
+ * Creates the first level with enemies, clouds, and background layers.
+ * @function
+ * @returns {Level} A new Level object with predefined enemies, clouds, and backgrounds.
+ */
 function createLevel1() {
   return new Level(
     [
       // enemies
-      new Chicken(), new Chicken(), new Chicken(),
+      new Chicken(),
+      new Chicken(),
+      new Chicken(),
     ],
     [
       // clouds

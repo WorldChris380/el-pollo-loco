@@ -1,6 +1,14 @@
+/**
+ * Represents a coin in the game.
+ * @class
+ * @extends DrawableObject
+ */
 class Coins extends DrawableObject {
   IMAGES_COINS = ["img/8_coin/coin_1.png", "img/8_coin/coin_2.png"];
 
+  /**
+   * Creates a new coin at a random position.
+   */
   constructor() {
     super().loadImages(this.IMAGES_COINS);
     this.x = 200 + Math.random() * 1000;
@@ -10,6 +18,10 @@ class Coins extends DrawableObject {
     this.setAmountOfCoins(this.amountOfCoins);
   }
 
+  /**
+   * Sets the number of coins and updates the image.
+   * @param {number} amountOfCoins
+   */
   setAmountOfCoins(amountOfCoins) {
     this.amountOfCoins = amountOfCoins;
     let imagePath =

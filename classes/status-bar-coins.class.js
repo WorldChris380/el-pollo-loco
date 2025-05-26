@@ -1,3 +1,8 @@
+/**
+ * Status bar for the number of collected coins.
+ * @class
+ * @extends DrawableObject
+ */
 class StatusBarCoins extends DrawableObject {
   IMAGES_STATUSBAR_COINS = [
     "img/7_statusbars/1_statusbar/1_statusbar_coin/blue/0.png",
@@ -10,6 +15,9 @@ class StatusBarCoins extends DrawableObject {
 
   amountOfCoins = 0;
 
+  /**
+   * Creates a new StatusBarCoins instance.
+   */
   constructor() {
     super();
     this.loadImages(this.IMAGES_STATUSBAR_COINS);
@@ -20,25 +28,26 @@ class StatusBarCoins extends DrawableObject {
     this.setAmountOfCoins(0);
   }
 
+  /**
+   * Sets the number of coins and updates the image.
+   * @param {number} amountOfCoins
+   */
   setAmountOfCoins(amountOfCoins) {
     this.amountOfCoins = amountOfCoins;
     let imagePath = this.IMAGES_STATUSBAR_COINS[this.resolveImage()];
     this.img = this.images[imagePath];
   }
 
+  /**
+   * Determines the correct image for the current coin count.
+   * @returns {number}
+   */
   resolveImage() {
-    if (this.amountOfCoins > 9) {
-      return 5;
-    } else if (this.amountOfCoins > 7) {
-      return 4;
-    } else if (this.amountOfCoins > 5) {
-      return 3;
-    } else if (this.amountOfCoins > 3) {
-      return 2;
-    } else if (this.amountOfCoins > 1) {
-      return 1;
-    } else {
-      return 0;
-    }
+    if (this.amountOfCoins > 9) return 5;
+    else if (this.amountOfCoins > 7) return 4;
+    else if (this.amountOfCoins > 5) return 3;
+    else if (this.amountOfCoins > 3) return 2;
+    else if (this.amountOfCoins > 1) return 1;
+    else return 0;
   }
 }
