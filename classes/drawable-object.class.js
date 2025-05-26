@@ -28,11 +28,13 @@ class DrawableObject {
   }
 
   isCollidingWithDrawable(drawableObject) {
+    const a = this.getCollisionBox ? this.getCollisionBox() : this;
+    const b = drawableObject.getCollisionBox ? drawableObject.getCollisionBox() : drawableObject;
     return (
-      this.x + this.width > drawableObject.x &&
-      this.y + this.height > drawableObject.y &&
-      this.x < drawableObject.x &&
-      this.y < drawableObject.y + drawableObject.height
+      a.x + a.width > b.x &&
+      a.y + a.height > b.y &&
+      a.x < b.x + b.width &&
+      a.y < b.y + b.height
     );
   }
 

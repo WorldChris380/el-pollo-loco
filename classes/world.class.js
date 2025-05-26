@@ -13,6 +13,8 @@ class World {
   collectedBottles = 0;
   coins = [];
   collectedCoins = 0;
+  mobileButtons = [];
+  pressedButtons = {};
 
   constructor(canvas, keyboard) {
     this.character = new Character();
@@ -30,6 +32,7 @@ class World {
     this.createCoins();
     this.endboss = new Endboss(this);
     this.level.enemies.push(this.endboss);
+    this.drawLoop(); // <--- Animationsschleife starten
   }
 
   setWorld() {
@@ -104,11 +107,15 @@ class World {
   }
 
   isColliding(obj1, obj2) {
+    let a = obj1,
+      b = obj2;
+    if (obj1 instanceof Character) a = obj1.getCollisionBox();
+    if (obj2 instanceof Character) b = obj2.getCollisionBox();
     return (
-      obj1.x + obj1.width > obj2.x &&
-      obj1.y + obj1.height > obj2.y &&
-      obj1.x < obj2.x + obj2.width &&
-      obj1.y < obj2.y + obj2.height
+      a.x + a.width > b.x &&
+      a.y + a.height > b.y &&
+      a.x < b.x + b.width &&
+      a.y < b.y + b.height
     );
   }
 
@@ -175,22 +182,23 @@ class World {
       this.addObjectsToCanvas(this.level.enemies);
       this.addObjectsToCanvas(this.throwableObjects);
       this.ctx.translate(-this.camera_x, 0);
+      // Mobile Controls nur anzeigen, wenn nicht Game Over
+      if (
+        typeof this.drawMobileControls === "function" &&
+        this.character.energy > 0
+      ) {
+        this.drawMobileControls();
+      }
     }
-    // Draw wird immer wieder aufgerufen
-    let self = this;
-    requestAnimationFrame(function () {
-      self.draw();
-    });
   }
 
   drawGameOverImage() {
-    if (!this.gameOverSoundPlayed) {
-      if (!this.gameOverSoundPlayed && soundOn) {
-        gameOverAudio.currentTime = 0;
-        gameOverAudio.play();
-        this.gameOverSoundPlayed = true;
-      }
+    if (!this.gameOverSoundPlayed && soundOn) {
+      gameOverAudio.currentTime = 0;
+      gameOverAudio.play();
+      this.gameOverSoundPlayed = true;
     }
+
     const img = new Image();
     img.src = "img/You won, you lost/Game over A.png";
     const centerX = this.canvas.width / 2;
@@ -375,4 +383,84 @@ class World {
     this.ctx.restore();
     moveableObject.x = moveableObject.x * -1;
   }
+
+  drawMobileControls() {
+    if (!isMobile()) return;
+    const w = this.canvas.width;
+    const h = this.canvas.height;
+    const btnSize = 70;
+    const margin = 20;
+    const gap = 30;
+
+    // Vertikal zentriert berechnen
+    const totalHeight = btnSize * 2 + gap;
+    const startY = (h - totalHeight) / 2;
+
+    // Links: ← oben, Flasche unten
+    this.mobileButtons[0] = {
+      key: "LEFT",
+      x: margin,
+      y: startY,
+      w: btnSize,
+      h: btnSize,
+      label: "←",
+    };
+    this.mobileButtons[1] = {
+      key: "ENTER",
+      x: margin,
+      y: startY + btnSize + gap,
+      w: btnSize,
+      h: btnSize,
+      label: "🧴",
+    };
+
+    // Rechts: → oben, Springen unten
+    this.mobileButtons[2] = {
+      key: "RIGHT",
+      x: w - btnSize - margin,
+      y: startY,
+      w: btnSize,
+      h: btnSize,
+      label: "→",
+    };
+    this.mobileButtons[3] = {
+      key: "UP",
+      x: w - btnSize - margin,
+      y: startY + btnSize + gap,
+      w: btnSize,
+      h: btnSize,
+      label: "⤒",
+    };
+
+    this.mobileButtons.forEach((btn) => {
+      this.ctx.save();
+      this.ctx.globalAlpha = this.pressedButtons[btn.key] ? 0.7 : 0.4;
+      this.ctx.fillStyle = "#a0220a";
+      this.ctx.beginPath();
+      this.ctx.arc(
+        btn.x + btn.w / 2,
+        btn.y + btn.h / 2,
+        btn.w / 2,
+        0,
+        2 * Math.PI
+      );
+      this.ctx.fill();
+      this.ctx.font = "bold 32px Arial";
+      this.ctx.fillStyle = "#fff";
+      this.ctx.textAlign = "center";
+      this.ctx.textBaseline = "middle";
+      this.ctx.fillText(btn.label, btn.x + btn.w / 2, btn.y + btn.h / 2);
+      this.ctx.restore();
+    });
+  }
+
+  drawLoop() {
+    this.draw();
+    requestAnimationFrame(() => this.drawLoop());
+  }
+}
+
+function handleTouch(e) {
+  if (e.cancelable) e.preventDefault();
+  // ... Rest wie gehabt ...
 }

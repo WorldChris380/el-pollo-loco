@@ -151,4 +151,25 @@ class Character extends MoveableObject {
       this.isWalking = true;
     }
   }
+
+  getCollisionBox() {
+    const fakeHeight = this.height - 150;
+    return {
+      x: this.x,
+      y: this.y + (this.height - fakeHeight),
+      width: this.width,
+      height: fakeHeight,
+    };
+  }
+
+  isColliding(other) {
+    const a = this.getCollisionBox ? this.getCollisionBox() : this;
+    const b = other.getCollisionBox ? other.getCollisionBox() : other;
+    return (
+      a.x + a.width > b.x &&
+      a.y + a.height > b.y &&
+      a.x < b.x + b.width &&
+      a.y < b.y + b.height
+    );
+  }
 }

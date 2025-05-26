@@ -3,6 +3,9 @@ let ctx;
 let world;
 let keyboard = new Keyboard();
 let soundOn = true;
+if (localStorage.getItem('soundOn') !== null) {
+  soundOn = localStorage.getItem('soundOn') === 'true';
+}
 let gameAudio = new Audio("audio/game-sound.wav");
 gameAudio.loop = true;
 
@@ -30,6 +33,13 @@ function init() {
   addFullscreenClick(canvasElement);
   mouseOverForFullscreen(canvasElement);
   addSubButtonClicks(canvasElement);
+  setupMobileCanvasControls(canvas);
+}
+
+function setupMobileCanvasControls(canvas) {
+  if (!isMobile()) return;
+  canvas.addEventListener("touchstart", handleTouch, {passive: false});
+  canvas.addEventListener("touchend", handleTouchEnd, {passive: false});
 }
 
 function addFullscreenClick(canvasElement) {
@@ -161,6 +171,7 @@ function addSubButtonClicks(canvasElement) {
 }
 
 function handleSoundToggle() {
+  localStorage.setItem('soundOn', soundOn); // <-- Speichern
   if (!soundOn) {
     gameAudio.pause();
     if (window.walkAudio) walkAudio.pause();
@@ -176,7 +187,11 @@ function handleSoundToggle() {
   }
 }
 
-
+function isMobile() {
+  return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
+    navigator.userAgent
+  );
+}
 
 function restartGame() {
   gameAudio.currentTime = 0;
@@ -223,3 +238,83 @@ window.addEventListener("keyup", (event) => {
     keyboard.ENTER = false;
   }
 });
+
+function handleTouch(e) {
+  if (e.cancelable) e.preventDefault();
+  if (!world || !world.mobileButtons) return;
+
+  for (let touch of e.touches) {
+    const rect = canvas.getBoundingClientRect();
+    const x = ((touch.clientX - rect.left) / rect.width) * canvas.width;
+    const y = ((touch.clientY - rect.top) / rect.height) * canvas.height;
+    let hitMobileButton = false;
+
+    // 1. Prüfe mobile Steuerungsbuttons
+    world.mobileButtons.forEach((btn) => {
+      if (
+        x >= btn.x &&
+        x <= btn.x + btn.w &&
+        y >= btn.y &&
+        y <= btn.y + btn.h
+      ) {
+        world.pressedButtons[btn.key] = true;
+        keyboard[btn.key] = true;
+        hitMobileButton = true;
+      }
+    });
+    if (hitMobileButton) return;
+
+    // **NEU: 2. Prüfe Tutorial-Close-Button**
+    if (world && world.showTutorial && world.tutorialCloseButton) {
+      const btn = world.tutorialCloseButton;
+      if (
+        x >= btn.x &&
+        x <= btn.x + btn.width &&
+        y >= btn.y &&
+        y <= btn.y + btn.height
+      ) {
+        world.showTutorial = false;
+        return;
+      }
+    }
+
+    // 3. Prüfe SubButtons
+    if (world.subButtonAreas) {
+      for (const btn of world.subButtonAreas) {
+        if (
+          x >= btn.x &&
+          x <= btn.x + btn.width &&
+          y >= btn.y &&
+          y <= btn.y + btn.height
+        ) {
+          if (btn.key === "tutorial") world.showTutorial = true;
+          if (btn.key === "legal") window.open("datenschutz.html", "_blank");
+          if (btn.key === "sound") {
+            soundOn = !soundOn;
+            handleSoundToggle();
+          }
+          if (btn.key === "fullscreen") {
+            toggleFullscreen(canvas);
+          }
+          return;
+        }
+      }
+    }
+
+    // 4. Prüfe Fullscreen-Button (falls separat)
+    if (typeof isFullscreenButton === "function" && isFullscreenButton(x, y, canvas)) {
+      toggleFullscreen(canvas);
+      return;
+    }
+  }
+}
+
+function handleTouchEnd(e) {
+  e.preventDefault();
+  if (!world || !world.mobileButtons) return;
+  // Alle Buttons zurücksetzen
+  world.mobileButtons.forEach((btn) => {
+    world.pressedButtons[btn.key] = false;
+    keyboard[btn.key] = false;
+  });
+}
