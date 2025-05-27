@@ -20,7 +20,9 @@ class World {
   collectedCoins = 0;
   mobileButtons = [];
   pressedButtons = {};
-  lastThrowTime = 0; // Füge dies als Eigenschaft der World-Klasse hinzu (z.B. ganz oben in der Klasse)
+  lastThrowTime = 0;
+  ui;
+  paused = false;
 
   /**
    * Initializes the world and starts the game.
@@ -36,31 +38,56 @@ class World {
     this.background = this.level.background;
     this.clouds = this.level.clouds;
     this.enemies = this.level.enemies;
-    this.draw();
+    this.ui = new WorldUI(this); // <--- WorldUI Instanz
     this.setWorld();
     this.run();
     this.createBottlesOnGround();
     this.createCoins();
+    this.mobileButtons = [];
     this.endboss = new Endboss(this);
     this.level.enemies.push(this.endboss);
+
+    // Setze world-Referenz für alle Enemies
+    this.level.enemies.forEach((enemy) => {
+      enemy.world = this;
+    });
+
     this.drawLoop();
+    this.draw(); // immer zeichnen, auch wenn pausiert!
+    requestAnimationFrame(() => this.drawLoop());
   }
 
-  /** Sets the reference to the world in the character. */
+  pause() {
+    this.paused = true;
+  }
+
+  resume() {
+    this.paused = false;
+  }
+
+  /**
+   * Sets the reference to the world in the character.
+   */
   setWorld() {
     this.character.world = this;
   }
 
-  /** Starts the main game logic in an interval. */
+  /**
+   * Starts the main game logic in an interval.
+   */
   run() {
-    setInterval(() => {
-      this.checkCollisions();
-      this.checkBottleHitsEndboss();
-      this.checkThrowObjects();
+    this.logicInterval = setInterval(() => {
+      if (!this.paused) {
+        this.checkCollisions();
+        this.checkBottleHitsEndboss();
+        this.checkThrowObjects();
+      }
     }, 180);
   }
 
-  /** Checks if a bottle can be thrown and creates it. */
+  /**
+   * Checks if a bottle can be thrown and creates it.
+   */
   checkThrowObjects() {
     const now = Date.now();
     if (
@@ -82,7 +109,9 @@ class World {
     }
   }
 
-  /** Checks and collects collisions with bottles. */
+  /**
+   * Checks and collects collisions with bottles.
+   */
   collidingWithBottles() {
     for (let i = this.bottlesOnGround.length - 1; i >= 0; i--) {
       if (this.character.isCollidingWithDrawable(this.bottlesOnGround[i])) {
@@ -93,7 +122,9 @@ class World {
     }
   }
 
-  /** Checks and collects collisions with coins. */
+  /**
+   * Checks and collects collisions with coins.
+   */
   collidingWithCoins() {
     for (let i = this.coins.length - 1; i >= 0; i--) {
       if (this.character.isCollidingWithDrawable(this.coins[i])) {
@@ -143,12 +174,17 @@ class World {
     );
   }
 
-  /** Returns the number of collected bottles. */
+  /**
+   * Returns the number of collected bottles.
+   * @returns {number}
+   */
   bottlesAvailable() {
     return this.collectedBottles;
   }
 
-  /** Checks collisions with enemies, bottles, and coins. */
+  /**
+   * Checks collisions with enemies, bottles, and coins.
+   */
   checkCollisions() {
     setInterval(() => {
       this.level.enemies.forEach((enemy) => {
@@ -166,7 +202,9 @@ class World {
     }, 200);
   }
 
-  /** Creates bottles on the ground. */
+  /**
+   * Creates bottles on the ground.
+   */
   createBottlesOnGround() {
     for (let i = 0; i < 10; i++) {
       let bottle = new BottlesGround();
@@ -174,7 +212,9 @@ class World {
     }
   }
 
-  /** Creates coins on the field. */
+  /**
+   * Creates coins on the field.
+   */
   createCoins() {
     for (let i = 0; i < 10; i++) {
       let coin = new Coins();
@@ -182,274 +222,10 @@ class World {
     }
   }
 
-  /** Draws the game field and all objects. */
-  draw() {
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.ctx.translate(this.camera_x, 0);
-    this.addObjectsToCanvas(this.level.background);
-    this.ctx.translate(-this.camera_x, 0);
-    if (this.showTutorial) this.drawTutorial();
-    else if (this.character.energy === 0) this.drawGameOverImage();
-    else this._drawGameObjects();
-  }
-
   /**
-   * Draws all main game objects and overlays.
-   * @private
-   */
-  _drawGameObjects() {
-    this.drawSubButtons();
-    this.addObjectsToCanvas(this.level.clouds);
-    this.addToCanvas(this.statusBar);
-    this.addToCanvas(this.statusBarCoins);
-    this.addToCanvas(this.statusBarBottles);
-    this.addToCanvas(this.statusBarEndboss);
-    this.ctx.translate(this.camera_x, 0);
-    this.addObjectsToCanvas(this.coins);
-    this.addToCanvas(this.character);
-    this.addObjectsToCanvas(this.level.enemies);
-    this.addObjectsToCanvas(this.bottlesOnGround);
-    this.addObjectsToCanvas(this.throwableObjects);
-    this.ctx.translate(-this.camera_x, 0);
-    if (
-      typeof this.drawMobileControls === "function" &&
-      this.character.energy > 0
-    ) {
-      this.drawMobileControls();
-    }
-  }
-
-  /**
-   * Draws the Game Over image and the restart button.
-   */
-  drawGameOverImage() {
-    if (!this.gameOverSoundPlayed && soundOn) {
-      gameOverAudio.currentTime = 0;
-      gameOverAudio.play();
-      this.gameOverSoundPlayed = true;
-    }
-    const img = new Image();
-    img.src = "img/You won, you lost/Game over A.png";
-    const centerX = this.canvas.width / 2;
-    const centerY = this.canvas.height / 2;
-    const width = 400;
-    const height = 200;
-    img.onload = () => {
-      this._drawGameOverImage(img, centerX, centerY, width, height);
-    };
-    if (img.complete) {
-      this._drawGameOverImage(img, centerX, centerY, width, height);
-    }
-  }
-
-  /**
-   * Draws the Game Over image and restart button.
-   * @private
-   * @param {HTMLImageElement} img
-   * @param {number} centerX
-   * @param {number} centerY
-   * @param {number} width
-   * @param {number} height
-   */
-  _drawGameOverImage(img, centerX, centerY, width, height) {
-    this.ctx.save();
-    this.ctx.globalAlpha = 0.95;
-    this.ctx.drawImage(
-      img,
-      centerX - width / 2,
-      centerY - height / 2,
-      width,
-      height
-    );
-    this.ctx.restore();
-    this.drawRestartButton(centerX, centerY + height / 2 + 40);
-  }
-
-  /**
-   * Draws the restart button and saves its position.
-   * @param {number} x - X position of the button.
-   * @param {number} y - Y position of the button.
-   */
-  drawRestartButton(x, y) {
-    const buttonWidth = 200;
-    const buttonHeight = 50;
-    const btnX = x - buttonWidth / 2;
-    const btnY = y;
-    this._drawRestartButtonRect(btnX, btnY, buttonWidth, buttonHeight, x);
-    this.restartButtonArea = {
-      x: btnX,
-      y: btnY,
-      width: buttonWidth,
-      height: buttonHeight,
-    };
-  }
-
-  /**
-   * Draws the restart button rectangle and label.
-   * @private
-   */
-  _drawRestartButtonRect(btnX, btnY, buttonWidth, buttonHeight, labelX) {
-    this.ctx.save();
-    this.ctx.globalAlpha = 1;
-    this.ctx.fillStyle = "#a0220a";
-    this.ctx.fillRect(btnX, btnY, buttonWidth, buttonHeight);
-    this.ctx.strokeStyle = "#fff";
-    this.ctx.lineWidth = 3;
-    this.ctx.strokeRect(btnX, btnY, buttonWidth, buttonHeight);
-    this.ctx.fillStyle = "#fff";
-    this.ctx.font = "bold 26px Arial";
-    this.ctx.textAlign = "center";
-    this.ctx.textBaseline = "middle";
-    this.ctx.fillText("New game", labelX, btnY + buttonHeight / 2);
-    this.ctx.restore();
-  }
-
-  /** Adds a list of objects to the canvas. */
-  addObjectsToCanvas(objects) {
-    objects.forEach((obj) => {
-      this.addToCanvas(obj);
-    });
-  }
-
-  /** Draws the sub buttons at the bottom of the canvas. */
-  drawSubButtons() {
-    const buttonWidth = 150;
-    const buttonHeight = 40;
-    const gap = 20;
-    const totalWidth = buttonWidth * 4 + gap * 3;
-    const startX = (this.canvas.width - totalWidth) / 2;
-    const y = this.canvas.height - 50;
-    const buttons = [
-      { label: "Legal Notice", key: "legal" },
-      { label: "Tutorial", key: "tutorial" },
-      { label: soundOn ? "Sound Off" : "Sound On", key: "sound" },
-      { label: "Fullscreen", key: "fullscreen" },
-    ];
-    this.subButtonAreas = [];
-    buttons.forEach((btn, i) =>
-      this._drawSubButton(btn, i, startX, buttonWidth, gap, y, buttonHeight)
-    );
-  }
-
-  /**
-   * Draws a single sub button and saves its area.
-   * @private
-   */
-  _drawSubButton(btn, i, startX, buttonWidth, gap, y, buttonHeight) {
-    const x = startX + i * (buttonWidth + gap);
-    this.ctx.save();
-    this.ctx.fillStyle = "rgba(160,34,10,0.9)";
-    this.ctx.fillRect(x, y, buttonWidth, buttonHeight);
-    this.ctx.fillStyle = "white";
-    this.ctx.font = "20px Arial";
-    this.ctx.textAlign = "center";
-    this.ctx.textBaseline = "middle";
-    this.ctx.fillText(btn.label, x + buttonWidth / 2, y + buttonHeight / 2);
-    this.ctx.restore();
-    this.subButtonAreas.push({
-      x,
-      y,
-      width: buttonWidth,
-      height: buttonHeight,
-      key: btn.key,
-    });
-  }
-
-  /** Draws the tutorial overlay and the close button. */
-  drawTutorial() {
-    this._drawTutorialOverlay();
-    this._drawTutorialText();
-    this._drawTutorialCloseButton();
-  }
-
-  /**
-   * Draws the tutorial overlay background.
-   * @private
-   */
-  _drawTutorialOverlay() {
-    this.ctx.save();
-    this.ctx.globalAlpha = 0.95;
-    this.ctx.fillStyle = "#222";
-    this.ctx.fillRect(60, 40, this.canvas.width - 120, this.canvas.height - 80);
-    this.ctx.globalAlpha = 1;
-    this.ctx.restore();
-  }
-
-  /**
-   * Draws the tutorial text.
-   * @private
-   */
-  _drawTutorialText() {
-    this.ctx.save();
-    this.ctx.fillStyle = "#fff";
-    this.ctx.font = "bold 36px Arial";
-    this.ctx.textAlign = "center";
-    this.ctx.fillText("Tutorial", this.canvas.width / 2, 100);
-    this.ctx.font = "20px Arial";
-    this.ctx.textAlign = "left";
-    let lines = [
-      "Steuerung:",
-      "→ oder D: Nach rechts laufen",
-      "← oder A: Nach links laufen",
-      "↑ oder W oder SPACE: Springen",
-      "ENTER oder E: Flasche werfen",
-    ];
-    let y = 150;
-    for (let line of lines) {
-      this.ctx.fillText(line, 100, y);
-      y += 35;
-    }
-    this.ctx.restore();
-  }
-
-  /**
-   * Draws the close button for the tutorial overlay.
-   * @private
-   */
-  _drawTutorialCloseButton() {
-    const btnWidth = 180;
-    const btnHeight = 50;
-    const btnX = this.canvas.width / 2 - btnWidth / 2;
-    const btnY = this.canvas.height - 120;
-    this.ctx.save();
-    this.ctx.fillStyle = "#a0220a";
-    this.ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
-    this.ctx.strokeStyle = "#fff";
-    this.ctx.lineWidth = 3;
-    this.ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
-    this.ctx.fillStyle = "#fff";
-    this.ctx.font = "bold 24px Arial";
-    this.ctx.textAlign = "center";
-    this.ctx.textBaseline = "middle";
-    this.ctx.fillText("Schließen", this.canvas.width / 2, btnY + btnHeight / 2);
-    this.ctx.restore();
-    this.tutorialCloseButton = {
-      x: btnX,
-      y: btnY,
-      width: btnWidth,
-      height: btnHeight,
-    };
-  }
-
-  /**
-   * Adds an object to the canvas and flips it if necessary.
+   * Flips the image of an object horizontally.
    * @param {MoveableObject} moveableObject
    */
-  addToCanvas(moveableObject, bottle) {
-    if (moveableObject.otherDirection) this.flipImage(moveableObject);
-    moveableObject.draw(this.ctx);
-    // moveableObject.drawFrame(this.ctx);
-    this.ctx.drawImage(
-      moveableObject.img,
-      moveableObject.x,
-      moveableObject.y,
-      moveableObject.width,
-      moveableObject.height
-    );
-    if (moveableObject.otherDirection) this.flipImageBack(moveableObject);
-  }
-
-  /** Flips the image of an object horizontally. */
   flipImage(moveableObject) {
     this.ctx.save();
     this.ctx.translate(moveableObject.width, 0);
@@ -457,79 +233,41 @@ class World {
     moveableObject.x = moveableObject.x * -1;
   }
 
-  /** Resets the image flip. */
+  /**
+   * Resets the image flip.
+   * @param {MoveableObject} moveableObject
+   */
   flipImageBack(moveableObject) {
     this.ctx.restore();
     moveableObject.x = moveableObject.x * -1;
   }
 
-  /** Starts the animation loop for drawing the world. */
+  /**
+   * Starts the animation loop for drawing the world.
+   */
   drawLoop() {
-    this.draw();
+    this.draw(); // immer zeichnen, damit Overlays sichtbar bleiben
     requestAnimationFrame(() => this.drawLoop());
   }
-}
 
-/**
- * Handles touch events for mobile controls and restart button.
- * Splits logic into helper functions for max 14 lines per function.
- * @param {TouchEvent} e
- */
-function handleTouch(e) {
-  if (e.cancelable) e.preventDefault();
-  if (!world || !world.mobileButtons) return;
-  for (let touch of e.touches) {
-    const { x, y } = getTouchPosition(touch);
-    if (handleMobileButtonTouch(x, y)) return;
-    handleRestartButtonTouch(x, y);
+  /**
+   * Draws the world and its elements.
+   */
+  draw() {
+    this.ui.draw();
   }
-}
 
-/**
- * Calculates the touch position relative to the canvas.
- * @param {Touch} touch
- * @returns {{x: number, y: number}}
- */
-function getTouchPosition(touch) {
-  const rect = canvas.getBoundingClientRect();
-  const x = ((touch.clientX - rect.left) / rect.width) * canvas.width;
-  const y = ((touch.clientY - rect.top) / rect.height) * canvas.height;
-  return { x, y };
-}
+  /**
+   * Pauses the game.
+   */
+  pause() {
+    this.paused = true;
+  }
 
-/**
- * Handles touch logic for mobile control buttons.
- * @param {number} x
- * @param {number} y
- * @returns {boolean} True if a mobile button was pressed.
- */
-function handleMobileButtonTouch(x, y) {
-  let hitMobileButton = false;
-  world.mobileButtons.forEach((btn) => {
-    if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
-      world.pressedButtons[btn.key] = true;
-      keyboard[btn.key] = true;
-      hitMobileButton = true;
-    }
-  });
-  return hitMobileButton;
-}
-
-/**
- * Handles touch logic for the Game Over restart button.
- * @param {number} x
- * @param {number} y
- */
-function handleRestartButtonTouch(x, y) {
-  if (world && world.restartButtonArea && world.character.energy === 0) {
-    const btn = world.restartButtonArea;
-    if (
-      x >= btn.x &&
-      x <= btn.x + btn.width &&
-      y >= btn.y &&
-      y <= btn.y + btn.height
-    ) {
-      restartGame();
-    }
+  /**
+   * Resumes the game.
+   */
+  resume() {
+    this.paused = false;
   }
 }

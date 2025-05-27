@@ -17,10 +17,6 @@ World.prototype.drawMobileControls = function () {
   this.mobileButtons.forEach((btn) => this._drawMobileButton(btn));
 };
 
-/**
- * Initializes the position and properties of the mobile buttons.
- * @private
- */
 World.prototype._setupMobileButtons = function () {
   const w = this.canvas.width;
   const h = this.canvas.height;
@@ -28,39 +24,35 @@ World.prototype._setupMobileButtons = function () {
     margin = 20,
     gap = 30;
   const totalHeight = btnSize * 2 + gap;
+
   const startY = (h - totalHeight) / 2;
-  this.mobileButtons[0] = {
-    key: "LEFT",
-    x: margin,
-    y: startY,
-    w: btnSize,
-    h: btnSize,
-    label: "←",
-  };
-  this.mobileButtons[1] = {
-    key: "ENTER",
-    x: margin,
-    y: startY + btnSize + gap,
-    w: btnSize,
-    h: btnSize,
-    label: "🧴",
-  };
-  this.mobileButtons[2] = {
-    key: "RIGHT",
-    x: w - btnSize - margin,
-    y: startY,
-    w: btnSize,
-    h: btnSize,
-    label: "→",
-  };
-  this.mobileButtons[3] = {
-    key: "UP",
-    x: w - btnSize - margin,
-    y: startY + btnSize + gap,
-    w: btnSize,
-    h: btnSize,
-    label: "⤒",
-  };
+  this.mobileButtons = [
+    { key: "LEFT", x: margin, y: startY, w: btnSize, h: btnSize, label: "←" },
+    {
+      key: "ENTER",
+      x: margin,
+      y: startY + btnSize + gap,
+      w: btnSize,
+      h: btnSize,
+      label: "🧴",
+    },
+    {
+      key: "RIGHT",
+      x: w - btnSize - margin,
+      y: startY,
+      w: btnSize,
+      h: btnSize,
+      label: "→",
+    },
+    {
+      key: "UP",
+      x: w - btnSize - margin,
+      y: startY + btnSize + gap,
+      w: btnSize,
+      h: btnSize,
+      label: "⤒",
+    },
+  ];
 };
 
 /**
@@ -118,7 +110,6 @@ function showTutorialOverlay() {
     ctx.fillText(line, 100, y);
     y += 35;
   }
-  // Schließen-Button
   const btnWidth = 180;
   const btnHeight = 50;
   const btnX = canvas.width / 2 - btnWidth / 2;

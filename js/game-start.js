@@ -1,0 +1,62 @@
+/**
+ * Checks if the start button was clicked.
+ * @param {MouseEvent} event - The mouse event.
+ */
+function handleCanvasClick(event) {
+  const { x, y } = getCanvasCoordinates(event, canvas);
+  if (handleTutorialOverlayClick(x, y)) return;
+  if (handleStartButtonClick(x, y)) return;
+  if (handleStartSubButtonsClick(x, y)) return;
+}
+
+function handleTutorialOverlayClick(x, y) {
+  if (showTutorialOverlayActive && tutorialCloseButtonArea) {
+    if (
+      x >= tutorialCloseButtonArea.x &&
+      x <= tutorialCloseButtonArea.x + tutorialCloseButtonArea.width &&
+      y >= tutorialCloseButtonArea.y &&
+      y <= tutorialCloseButtonArea.y + tutorialCloseButtonArea.height
+    ) {
+      showTutorialOverlayActive = false;
+      showStartButton = true;
+      drawStartScreen();
+      return true;
+    }
+  }
+  return false;
+}
+
+function handleStartButtonClick(x, y) {
+  if (
+    showStartButton &&
+    startButtonArea &&
+    x >= startButtonArea.x &&
+    x <= startButtonArea.x + startButtonArea.width &&
+    y >= startButtonArea.y &&
+    y <= startButtonArea.y + startButtonArea.height
+  ) {
+    showStartButton = false;
+    document.getElementById("startscreen").style.display = "none";
+    document.getElementById("canvas").style.display = "block";
+    init();
+    return true;
+  }
+  return false;
+}
+
+function handleStartSubButtonsClick(x, y) {
+  if (showStartButton && startSubButtonAreas) {
+    for (const btn of startSubButtonAreas) {
+      if (
+        x >= btn.x &&
+        x <= btn.x + btn.width &&
+        y >= btn.y &&
+        y <= btn.y + btn.height
+      ) {
+        handleStartSubButton(btn);
+        return true;
+      }
+    }
+  }
+  return false;
+}
