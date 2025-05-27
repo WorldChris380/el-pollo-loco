@@ -11,6 +11,7 @@ class Endboss extends MoveableObject {
   speed = 6;
   energy = 100;
   isDead = false;
+  lastHitSound = 0;
 
   IMAGES_WALKING = [
     "img/4_enemie_boss_chicken/2_alert/G5.png",
@@ -53,22 +54,32 @@ class Endboss extends MoveableObject {
    * Reduces the endboss's energy when hit.
    */
   hit() {
+    if (this.isDead) return;
     this.energy -= 5;
     if (this.energy < 0) {
       this.energy = 0;
       this.isDead = true;
     }
+    const now = Date.now();
+    if (
+      soundOn &&
+      this.world &&
+      this.world.character &&
+      this.world.character.energy > 0 &&
+      (endbossWalkAudio.paused || endbossWalkAudio.ended) &&
+      now - this.lastHitSound > 1000
+    ) {
+      endbossWalkAudio.currentTime = 0;
+      endbossWalkAudio.play();
+      this.lastHitSound = now;
+    }
   }
 
   /**
-   * Moves the endboss to the left and plays sound if needed.
+   * Moves the endboss to the left (no sound here anymore).
    */
   moveEndbossLeft() {
     this.x -= this.speed;
-    if (soundOn && endbossWalkAudio.paused) {
-      endbossWalkAudio.currentTime = 0;
-      endbossWalkAudio.play();
-    }
   }
 
   /**
@@ -91,7 +102,9 @@ class Endboss extends MoveableObject {
         this.stopEndbossWalk();
         return;
       }
-      if (this.world.character.x > 1000) {
+      // Sobald der Endboss einmal losgelaufen ist, bleibt hadFirstContact true
+      if (this.world.character.x > 1000 || this.hadFirstContact) {
+        this.hadFirstContact = true;
         this.moveEndbossLeft();
         this.playAnimation(this.IMAGES_ATTACK);
       } else {
@@ -99,10 +112,7 @@ class Endboss extends MoveableObject {
         this.playAnimation(this.IMAGES_WALKING);
       }
       i++;
-      if (this.world.endboss.x > 1000 && !this.hadFirstContact) {
-        i = 0;
-        this.hadFirstContact = true;
-      }
+      // Die folgende Prüfung ist nicht mehr nötig, da hadFirstContact dauerhaft true bleibt
     }, 200);
   }
 
@@ -118,5 +128,19 @@ class Endboss extends MoveableObject {
     ctx.rect(this.x, this.y, this.width, this.height);
     ctx.stroke();
     ctx.restore();
+  }
+
+  /**
+   * Returns the endboss's collision box.
+   * The collision box is thinner on both the left and right sides than the visible sprite.
+   * @returns {{x:number, y:number, width:number, height:number}}
+   */
+  getCollisionBox() {
+    return {
+      x: this.x + 50,
+      y: this.y,
+      width: this.width - 100,
+      height: this.height,
+    };
   }
 }

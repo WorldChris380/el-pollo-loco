@@ -13,6 +13,7 @@ class Character extends MoveableObject {
     "img/2_character_pepe/2_walk/W-25.png",
     "img/2_character_pepe/2_walk/W-26.png",
   ];
+
   IMAGES_JUMPING = [
     "img/2_character_pepe/3_jump/J-31.png",
     "img/2_character_pepe/3_jump/J-32.png",
@@ -24,6 +25,33 @@ class Character extends MoveableObject {
     "img/2_character_pepe/3_jump/J-38.png",
     "img/2_character_pepe/3_jump/J-39.png",
   ];
+
+  IMAGES_IDLE = [
+    "img/2_character_pepe/1_idle/idle/I-1.png",
+    "img/2_character_pepe/1_idle/idle/I-2.png",
+    "img/2_character_pepe/1_idle/idle/I-3.png",
+    "img/2_character_pepe/1_idle/idle/I-4.png",
+    "img/2_character_pepe/1_idle/idle/I-5.png",
+    "img/2_character_pepe/1_idle/idle/I-6.png",
+    "img/2_character_pepe/1_idle/idle/I-7.png",
+    "img/2_character_pepe/1_idle/idle/I-8.png",
+    "img/2_character_pepe/1_idle/idle/I-9.png",
+    "img/2_character_pepe/1_idle/idle/I-10.png",
+  ];
+
+  IMAGES_SLEEPING = [
+    "img/2_character_pepe/1_idle/long_idle/I-11.png",
+    "img/2_character_pepe/1_idle/long_idle/I-12.png",
+    "img/2_character_pepe/1_idle/long_idle/I-13.png",
+    "img/2_character_pepe/1_idle/long_idle/I-14.png",
+    "img/2_character_pepe/1_idle/long_idle/I-15.png",
+    "img/2_character_pepe/1_idle/long_idle/I-16.png",
+    "img/2_character_pepe/1_idle/long_idle/I-17.png",
+    "img/2_character_pepe/1_idle/long_idle/I-18.png",
+    "img/2_character_pepe/1_idle/long_idle/I-19.png",
+    "img/2_character_pepe/1_idle/long_idle/I-20.png",
+  ];
+
   IMAGES_DEAD = ["img/2_character_pepe/5_dead/D-51.png"];
   IMAGES_HURT = [
     "img/2_character_pepe/4_hurt/H-42.png",
@@ -39,6 +67,12 @@ class Character extends MoveableObject {
   isJumping = false;
   lastHurtTime = 0;
   wasHurt = false;
+  lastActionTime = 0;
+  isSleeping = false;
+  jumpAnimFrame = 0;
+  jumpAnimActive = false;
+  jumpInitiated = false;
+  lastJumpAnimTime = 0;
 
   /**
    * Initializes the character, loads images and sounds.
@@ -47,6 +81,8 @@ class Character extends MoveableObject {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_JUMPING);
+    this.loadImages(this.IMAGES_IDLE);
+    this.loadImages(this.IMAGES_SLEEPING);
     this.loadImages(this.IMAGES_HURT);
     this.loadImages(this.IMAGES_DEAD);
     this.animate();
@@ -55,6 +91,7 @@ class Character extends MoveableObject {
     this.y = 0;
     this.applyGravity();
     this.walkAudio.loop = true;
+    this.lastActionTime = Date.now();
   }
 
   /**
@@ -64,9 +101,7 @@ class Character extends MoveableObject {
    */
   isFallingOn(enemy) {
     return (
-      this.speedY < 0 &&
-      this.y + this.height - enemy.y < 30 &&
-      this.y < enemy.y
+      this.speedY < 0 && this.y + this.height - enemy.y < 30 && this.y < enemy.y
     );
   }
 
@@ -104,6 +139,8 @@ class Character extends MoveableObject {
         this.moveLeft();
         this.otherDirection = true;
       }
+      this.lastActionTime = Date.now();
+      this.isSleeping = false;
     } else {
       this.stopWalkSound();
     }
@@ -114,11 +151,14 @@ class Character extends MoveableObject {
    * @private
    */
   handleJump() {
-    if (this.world.keyboard.UP && !this.isAboveGround()) {
-      if (!this.isJumping) this.playJumpSound();
+    if (this.world.keyboard.UP && !this.isAboveGround() && !this.isJumping) {
       this.jump();
-    } else {
-      this.isJumping = false;
+      this.lastActionTime = Date.now();
+      this.isSleeping = false;
+      this.playJumpSound();
+      this.jumpInitiated = true;
+      this.jumpAnimFrame = 0;
+      this.jumpAnimActive = true;
     }
   }
 
@@ -142,18 +182,65 @@ class Character extends MoveableObject {
    * @private
    */
   handleAnimation() {
+    const now = Date.now();
+
     if (this.isDead()) {
       this.playAnimation(this.IMAGES_DEAD);
       this.stopWalkSound();
-    } else if (this.isHurt()) {
-      this.playAnimation(this.IMAGES_HURT);
-    } else if (this.isAboveGround()) {
-      this.playAnimation(this.IMAGES_JUMPING);
-    } else {
-      if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-        this.playAnimation(this.IMAGES_WALKING);
-      }
+      this.isSleeping = false;
+      this.jumpInitiated = false;
+      return;
     }
+
+    if (this.isHurt()) {
+      this.playAnimation(this.IMAGES_HURT);
+      this.isSleeping = false;
+      this.lastActionTime = now;
+      this.jumpInitiated = false;
+      return;
+    }
+
+    if (this.isAboveGround()) {
+        if (!this.jumpAnimActive && this.jumpAnimFrame === 0) {
+            this.jumpAnimActive = true;
+            this.lastJumpAnimTime = now;
+        }
+
+        const jumpAnimSpeed = 50;
+        if (this.jumpAnimActive && this.jumpAnimFrame < this.IMAGES_JUMPING.length) {
+            if (!this.lastJumpAnimTime || now - this.lastJumpAnimTime > jumpAnimSpeed) {
+                this.img = this.images[this.IMAGES_JUMPING[this.jumpAnimFrame]];
+                this.jumpAnimFrame++;
+                this.lastJumpAnimTime = now;
+            }
+        } else {
+            this.img = this.images[this.IMAGES_JUMPING[this.IMAGES_JUMPING.length - 1]];
+            this.jumpAnimActive = false;
+        }
+        this.isSleeping = false;
+        return;
+    } else {
+        this.isJumping = false;
+        this.jumpInitiated = false;
+        this.jumpAnimActive = false;
+        this.jumpAnimFrame = 0;
+        this.lastJumpAnimTime = 0;
+
+        if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
+          this.playAnimation(this.IMAGES_WALKING);
+          this.isSleeping = false;
+        } else {
+          const timeSinceLastAction = now - this.lastActionTime;
+          if (timeSinceLastAction > 3000) {
+            this.playAnimation(this.IMAGES_SLEEPING);
+            this.isSleeping = true;
+            this.stopWalkSound();
+          } else {
+            this.playAnimation(this.IMAGES_IDLE);
+            this.isSleeping = false;
+          }
+        }
+      }
   }
 
   /**
@@ -201,14 +288,15 @@ class Character extends MoveableObject {
 
   /**
    * Returns the character's collision box.
+   * The collision box is 20px thinner on both the left and right sides than the visible sprite.
    * @returns {{x:number, y:number, width:number, height:number}}
    */
   getCollisionBox() {
     const fakeHeight = this.height - 150;
     return {
-      x: this.x,
+      x: this.x + 60,
       y: this.y + (this.height - fakeHeight),
-      width: this.width,
+      width: this.width - 120,
       height: fakeHeight,
     };
   }

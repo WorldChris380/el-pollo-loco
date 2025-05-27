@@ -20,6 +20,7 @@ class World {
   collectedCoins = 0;
   mobileButtons = [];
   pressedButtons = {};
+  lastThrowTime = 0; // Füge dies als Eigenschaft der World-Klasse hinzu (z.B. ganz oben in der Klasse)
 
   /**
    * Initializes the world and starts the game.
@@ -61,16 +62,23 @@ class World {
 
   /** Checks if a bottle can be thrown and creates it. */
   checkThrowObjects() {
-    if (this.keyboard.ENTER && this.collectedBottles > 0) {
+    const now = Date.now();
+    if (
+      this.keyboard.ENTER &&
+      this.collectedBottles > 0 &&
+      (!this.lastThrowTime || now - this.lastThrowTime > 1000)
+    ) {
       this.collectedBottles--;
       this.statusBarBottles.setAmount(this.collectedBottles);
       let offsetX = this.character.otherDirection ? -50 : 50;
       let bottle = new ThrowableObject(
         this.character.x + offsetX,
         this.character.y + this.character.height - 70,
-        this.character.otherDirection
+        this.character.otherDirection,
+        this
       );
       this.throwableObjects.push(bottle);
+      this.lastThrowTime = now;
     }
   }
 
@@ -111,9 +119,9 @@ class World {
         !this.endboss.isDead &&
         !bottle.isBroken
       ) {
+        bottle.break();
         this.endboss.hit();
         this.statusBarEndboss.setPercentage(this.endboss.energy);
-        bottle.break();
       }
     });
   }
@@ -125,10 +133,8 @@ class World {
    * @returns {boolean}
    */
   isColliding(obj1, obj2) {
-    let a = obj1,
-      b = obj2;
-    if (obj1 instanceof Character) a = obj1.getCollisionBox();
-    if (obj2 instanceof Character) b = obj2.getCollisionBox();
+    const a = obj1.getCollisionBox ? obj1.getCollisionBox() : obj1;
+    const b = obj2.getCollisionBox ? obj2.getCollisionBox() : obj2;
     return (
       a.x + a.width > b.x &&
       a.y + a.height > b.y &&
@@ -199,10 +205,10 @@ class World {
     this.addToCanvas(this.statusBarBottles);
     this.addToCanvas(this.statusBarEndboss);
     this.ctx.translate(this.camera_x, 0);
-    this.addObjectsToCanvas(this.bottlesOnGround);
     this.addObjectsToCanvas(this.coins);
     this.addToCanvas(this.character);
     this.addObjectsToCanvas(this.level.enemies);
+    this.addObjectsToCanvas(this.bottlesOnGround);
     this.addObjectsToCanvas(this.throwableObjects);
     this.ctx.translate(-this.camera_x, 0);
     if (
@@ -293,7 +299,7 @@ class World {
     this.ctx.fillStyle = "#fff";
     this.ctx.font = "bold 26px Arial";
     this.ctx.textAlign = "center";
-    this.ctx.textBaseline = "middle"; 
+    this.ctx.textBaseline = "middle";
     this.ctx.fillText("New game", labelX, btnY + buttonHeight / 2);
     this.ctx.restore();
   }
@@ -500,12 +506,7 @@ function getTouchPosition(touch) {
 function handleMobileButtonTouch(x, y) {
   let hitMobileButton = false;
   world.mobileButtons.forEach((btn) => {
-    if (
-      x >= btn.x &&
-      x <= btn.x + btn.w &&
-      y >= btn.y &&
-      y <= btn.y + btn.h
-    ) {
+    if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
       world.pressedButtons[btn.key] = true;
       keyboard[btn.key] = true;
       hitMobileButton = true;
@@ -520,11 +521,7 @@ function handleMobileButtonTouch(x, y) {
  * @param {number} y
  */
 function handleRestartButtonTouch(x, y) {
-  if (
-    world &&
-    world.restartButtonArea &&
-    world.character.energy === 0
-  ) {
+  if (world && world.restartButtonArea && world.character.energy === 0) {
     const btn = world.restartButtonArea;
     if (
       x >= btn.x &&

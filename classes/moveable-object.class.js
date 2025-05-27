@@ -29,9 +29,10 @@ class MoveableObject extends DrawableObject {
    */
   isAboveGround() {
     if (this instanceof ThrowableObject) {
-      return true;
+      // Throwable objects are always "above ground" until they break
+      return this.y < 355; // Oder eine andere Logik für Flaschen
     } else {
-      return this.y < 150;
+      return this.y < 150; // Für Character und andere Enemies
     }
   }
 

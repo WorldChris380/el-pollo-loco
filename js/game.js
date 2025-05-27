@@ -17,10 +17,12 @@ if (localStorage.getItem("soundOn") !== null) {
 let gameAudio = new Audio("audio/game-sound.wav");
 gameAudio.loop = true;
 let startButtonArea = null;
+let startSubButtonAreas = [];
 let showStartButton = true;
 
 /**
  * Initializes the game and shows the start screen.
+ * Called on window load.
  */
 window.onload = function () {
   canvas = document.getElementById("canvas");
@@ -49,7 +51,7 @@ function init() {
 
 /**
  * Binds touch events for mobile controls to the canvas.
- * @param {HTMLCanvasElement} canvas
+ * @param {HTMLCanvasElement} canvas - The canvas element.
  */
 function setupMobileCanvasControls(canvas) {
   if (!isMobile()) return;
@@ -59,7 +61,7 @@ function setupMobileCanvasControls(canvas) {
 
 /**
  * Binds a click event for the fullscreen button.
- * @param {HTMLCanvasElement} canvasElement
+ * @param {HTMLCanvasElement} canvasElement - The canvas element.
  */
 function addFullscreenClick(canvasElement) {
   canvasElement.addEventListener("click", function (event) {
@@ -72,8 +74,8 @@ function addFullscreenClick(canvasElement) {
 
 /**
  * Calculates the canvas coordinates from an event.
- * @param {MouseEvent|TouchEvent} event
- * @param {HTMLCanvasElement} canvasElement
+ * @param {MouseEvent|TouchEvent} event - The event object.
+ * @param {HTMLCanvasElement} canvasElement - The canvas element.
  * @returns {{x: number, y: number}}
  */
 function getCanvasCoordinates(event, canvasElement) {
@@ -85,9 +87,9 @@ function getCanvasCoordinates(event, canvasElement) {
 
 /**
  * Checks if the coordinates are on the fullscreen button.
- * @param {number} x
- * @param {number} y
- * @param {HTMLCanvasElement} canvasElement
+ * @param {number} x - X coordinate.
+ * @param {number} y - Y coordinate.
+ * @param {HTMLCanvasElement} canvasElement - The canvas element.
  * @returns {boolean}
  */
 function isFullscreenButton(x, y, canvasElement) {
@@ -101,7 +103,7 @@ function isFullscreenButton(x, y, canvasElement) {
 
 /**
  * Toggles fullscreen mode for the canvas.
- * @param {HTMLCanvasElement} canvasElement
+ * @param {HTMLCanvasElement} canvasElement - The canvas element.
  */
 function toggleFullscreen(canvasElement) {
   if (
@@ -123,7 +125,7 @@ function toggleFullscreen(canvasElement) {
 
 /**
  * Changes the mouse cursor when hovering over the fullscreen button.
- * @param {HTMLCanvasElement} canvasElement
+ * @param {HTMLCanvasElement} canvasElement - The canvas element.
  */
 function mouseOverForFullscreen(canvasElement) {
   canvasElement.addEventListener("mousemove", function (event) {
@@ -145,7 +147,7 @@ function mouseOverForFullscreen(canvasElement) {
 
 /**
  * Binds click events for sub buttons, tutorial, and restart to the canvas.
- * @param {HTMLCanvasElement} canvasElement
+ * @param {HTMLCanvasElement} canvasElement - The canvas element.
  */
 function addSubButtonClicks(canvasElement) {
   canvasElement.addEventListener("click", function (event) {
@@ -163,6 +165,9 @@ function addSubButtonClicks(canvasElement) {
 
 /**
  * Checks and closes the tutorial if the button was hit.
+ * @param {number} x - X coordinate.
+ * @param {number} y - Y coordinate.
+ * @returns {boolean}
  * @private
  */
 function checkTutorialClose(x, y) {
@@ -183,6 +188,9 @@ function checkTutorialClose(x, y) {
 
 /**
  * Checks and restarts the game if the restart button was hit.
+ * @param {number} x - X coordinate.
+ * @param {number} y - Y coordinate.
+ * @returns {boolean}
  * @private
  */
 function checkRestartButton(x, y) {
@@ -203,6 +211,10 @@ function checkRestartButton(x, y) {
 
 /**
  * Handles sub buttons (tutorial, legal, sound, fullscreen).
+ * @param {Object} btn - The button object.
+ * @param {number} x - X coordinate.
+ * @param {number} y - Y coordinate.
+ * @param {HTMLCanvasElement} canvasElement - The canvas element.
  * @private
  */
 function handleSubButton(btn, x, y, canvasElement) {
@@ -213,7 +225,7 @@ function handleSubButton(btn, x, y, canvasElement) {
     y <= btn.y + btn.height
   ) {
     if (btn.key === "tutorial") world.showTutorial = true;
-    if (btn.key === "legal") window.open("datenschutz.html", "_blank");
+    if (btn.key === "legal") window.location.href = "datenschutz.html";
     if (btn.key === "sound") {
       soundOn = !soundOn;
       handleSoundToggle();
@@ -265,6 +277,7 @@ function restartGame() {
 
 /**
  * Keyboard event: key pressed.
+ * @param {KeyboardEvent} event
  */
 window.addEventListener("keydown", (event) => {
   if (event.keyCode == 39 || event.keyCode == 68) keyboard.RIGHT = true;
@@ -277,6 +290,7 @@ window.addEventListener("keydown", (event) => {
 
 /**
  * Keyboard event: key released.
+ * @param {KeyboardEvent} event
  */
 window.addEventListener("keyup", (event) => {
   if (event.keyCode == 39 || event.keyCode == 68) keyboard.RIGHT = false;
@@ -289,7 +303,7 @@ window.addEventListener("keyup", (event) => {
 
 /**
  * Handles touch events for mobile controls, sub buttons, tutorial, and restart.
- * @param {TouchEvent} e
+ * @param {TouchEvent} e - The touch event.
  */
 function handleTouch(e) {
   if (e.cancelable) e.preventDefault();
@@ -314,10 +328,9 @@ function handleTouch(e) {
 
 /**
  * Handles the end of a touch event for mobile controls.
- * @param {TouchEvent} e
+ * @param {TouchEvent} e - The touch event.
  */
 function handleTouchEnd(e) {
-  // Optional: Set all pressedButtons/keyboard states to false
   if (!world || !world.mobileButtons) return;
   world.mobileButtons.forEach((btn) => {
     world.pressedButtons[btn.key] = false;
@@ -327,6 +340,9 @@ function handleTouchEnd(e) {
 
 /**
  * Checks mobile control buttons on touch.
+ * @param {number} x - X coordinate.
+ * @param {number} y - Y coordinate.
+ * @returns {boolean}
  * @private
  */
 function handleMobileButtons(x, y) {
@@ -343,6 +359,9 @@ function handleMobileButtons(x, y) {
 
 /**
  * Checks sub buttons on touch.
+ * @param {number} x - X coordinate.
+ * @param {number} y - Y coordinate.
+ * @returns {boolean}
  * @private
  */
 function handleSubButtonsTouch(x, y) {
@@ -355,7 +374,7 @@ function handleSubButtonsTouch(x, y) {
         y <= btn.y + btn.height
       ) {
         if (btn.key === "tutorial") world.showTutorial = true;
-        if (btn.key === "legal") window.open("datenschutz.html", "_blank");
+        if (btn.key === "legal") window.location.href = "datenschutz.html";
         if (btn.key === "sound") {
           soundOn = !soundOn;
           handleSoundToggle();
@@ -369,16 +388,148 @@ function handleSubButtonsTouch(x, y) {
 }
 
 /**
- * Zeichnet den Start-Button im Canvas.
+ * Draws the start sub buttons on the canvas.
+ */
+function drawStartSubButtons() {
+  const buttonWidth = 150;
+  const buttonHeight = 40;
+  const gap = 20;
+  const totalWidth = buttonWidth * 4 + gap * 3;
+  const startX = (canvas.width - totalWidth) / 2;
+  const y = canvas.height - 50;
+  const buttons = [
+    { label: "Legal Notice", key: "legal" },
+    { label: "Tutorial", key: "tutorial" },
+    { label: soundOn ? "Sound Off" : "Sound On", key: "sound" },
+    { label: "Fullscreen", key: "fullscreen" },
+  ];
+  startSubButtonAreas = [];
+  buttons.forEach((btn, i) => {
+    const x = startX + i * (buttonWidth + gap);
+    ctx.save();
+    ctx.fillStyle = "rgba(160,34,10,0.9)";
+    ctx.fillRect(x, y, buttonWidth, buttonHeight);
+    ctx.fillStyle = "white";
+    ctx.font = "20px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(btn.label, x + buttonWidth / 2, y + buttonHeight / 2);
+    ctx.restore();
+    startSubButtonAreas.push({
+      x,
+      y,
+      width: buttonWidth,
+      height: buttonHeight,
+      key: btn.key,
+    });
+  });
+}
+
+/**
+ * Checks if the start button was clicked.
+ * @param {MouseEvent} event - The mouse event.
+ */
+function handleCanvasClick(event) {
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  if (showTutorialOverlayActive && tutorialCloseButtonArea) {
+    if (
+      x >= tutorialCloseButtonArea.x &&
+      x <= tutorialCloseButtonArea.x + tutorialCloseButtonArea.width &&
+      y >= tutorialCloseButtonArea.y &&
+      y <= tutorialCloseButtonArea.y + tutorialCloseButtonArea.height
+    ) {
+      showTutorialOverlayActive = false;
+      showStartButton = true;
+      drawStartScreen();
+      return;
+    }
+  }
+
+  if (
+    showStartButton &&
+    startButtonArea &&
+    x >= startButtonArea.x &&
+    x <= startButtonArea.x + startButtonArea.width &&
+    y >= startButtonArea.y &&
+    y <= startButtonArea.y + startButtonArea.height
+  ) {
+    showStartButton = false;
+    document.getElementById("startscreen").style.display = "none";
+    document.getElementById("canvas").style.display = "block";
+    init();
+    return;
+  }
+
+  if (showStartButton && startSubButtonAreas) {
+    for (const btn of startSubButtonAreas) {
+      if (
+        x >= btn.x &&
+        x <= btn.x + btn.width &&
+        y >= btn.y &&
+        y <= btn.y + btn.height
+      ) {
+        handleStartSubButton(btn);
+        return;
+      }
+    }
+  }
+}
+
+/**
+ * Draws the start screen image and the start button on the canvas.
+ */
+function drawStartScreen() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const img = new Image();
+  img.src = "img/9_intro_outro_screens/start/startscreen_1.png";
+  img.onload = function () {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    drawStartButton();
+    drawStartSubButtons();
+  };
+  if (img.complete) {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    drawStartButton();
+    drawStartSubButtons();
+  }
+}
+
+/**
+ * Handles the start sub buttons actions: tutorial, legal, sound, fullscreen.
+ * @param {Object} btn - The button object containing key and other properties.
+ */
+function handleStartSubButton(btn) {
+  if (btn.key === "tutorial") {
+    showStartButton = false;
+    showTutorialOverlay();
+  }
+  if (btn.key === "legal") {
+    showStartButton = false;
+    showLegalOverlay();
+  }
+  if (btn.key === "sound") {
+    soundOn = !soundOn;
+    handleSoundToggle();
+    drawStartScreen();
+  }
+  if (btn.key === "fullscreen") {
+    toggleFullscreen(canvas);
+  }
+}
+
+/**
+ * Draws the start button on the canvas.
  */
 function drawStartButton() {
-  if (!canvas || !ctx) return;
-  ctx.save();
-  ctx.globalAlpha = 0.95;
   const btnWidth = 260;
   const btnHeight = 60;
   const btnX = canvas.width / 2 - btnWidth / 2;
   const btnY = 40;
+  ctx.save();
+  ctx.globalAlpha = 0.95;
   ctx.fillStyle = "#a0220a";
   ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
   ctx.strokeStyle = "#fff";
@@ -391,43 +542,4 @@ function drawStartButton() {
   ctx.fillText("Start game", canvas.width / 2, btnY + btnHeight / 2);
   ctx.restore();
   startButtonArea = { x: btnX, y: btnY, width: btnWidth, height: btnHeight };
-}
-
-/**
- * Prüft, ob auf den Start-Button geklickt wurde.
- */
-function handleCanvasClick(event) {
-  if (!showStartButton || !startButtonArea) return;
-  const rect = canvas.getBoundingClientRect();
-  const x = event.clientX - rect.left;
-  const y = event.clientY - rect.top;
-  if (
-    x >= startButtonArea.x &&
-    x <= startButtonArea.x + startButtonArea.width &&
-    y >= startButtonArea.y &&
-    y <= startButtonArea.y + startButtonArea.height
-  ) {
-    showStartButton = false;
-    document.getElementById("startscreen").style.display = "none";
-    document.getElementById("canvas").style.display = "block";
-    init();
-  }
-}
-
-/**
- * Zeichnet das Startscreen-Bild und den Button im Canvas.
- */
-function drawStartScreen() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const img = new Image();
-  img.src = "img/9_intro_outro_screens/start/startscreen_1.png";
-  img.onload = function () {
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    drawStartButton();
-  };
-  // Falls das Bild schon geladen ist
-  if (img.complete) {
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    drawStartButton();
-  }
 }

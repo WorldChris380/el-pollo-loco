@@ -60,16 +60,16 @@ class ThrowableObject extends MoveableObject {
   }
 
   /**
-   * Plays the breaking animation and removes the object.
+   * Plays the breaking animation and removes the object AFTER the animation.
    */
   playBrokenAnimation() {
-    let interval = setInterval(() => {
+    let animationInterval = setInterval(() => {
       if (this.brokenAnimationIndex < this.IMAGE_BOTTLE_BROKEN.length) {
         this.img =
           this.images[this.IMAGE_BOTTLE_BROKEN[this.brokenAnimationIndex]];
         this.brokenAnimationIndex++;
       } else {
-        clearInterval(interval);
+        clearInterval(animationInterval);
         if (this.world && this.world.throwableObjects) {
           let idx = this.world.throwableObjects.indexOf(this);
           if (idx > -1) this.world.throwableObjects.splice(idx, 1);
@@ -82,14 +82,14 @@ class ThrowableObject extends MoveableObject {
    * Throws the bottle and animates its trajectory.
    */
   throw() {
-    this.speedY = 30;
+    this.speedY = 18;
     this.applyGravity();
     this.throwInterval = setInterval(() => {
       if (!this.isBroken) {
         if (this.otherDirection) {
-          this.x -= 10;
+          this.x -= 6;
         } else {
-          this.x += 10;
+          this.x += 6;
         }
         if (this.y >= 355) {
           this.break();
