@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: js/screen-orientation.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,45 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: js/screen-orientation.js</h1>
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Checks the current screen orientation and shows the overlay if necessary.
+ * Also displays mobile control buttons if on a mobile device.
+ * @module screen-orientation
+ */
 
+/**
+ * Checks the device type and orientation, and updates the UI accordingly.
+ * Shows the rotate overlay if on a mobile device in portrait mode.
+ * Shows mobile control buttons if on a mobile device.
+ */
+function checkOrientation() {
+  const overlay = document.getElementById("rotate-overlay");
+  const isMobile =
+    /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent) ||
+    (navigator.userAgent.includes("Macintosh") &amp;&amp; "ontouchend" in document);
 
-    <h3> </h3>
+  if (isMobile &amp;&amp; window.innerHeight > window.innerWidth) {
+    overlay.style.display = "flex";
+  } else {
+    overlay.style.display = "none";
+  }
+}
 
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
+window.addEventListener("load", checkOrientation);
+window.addEventListener("resize", checkOrientation);
+window.addEventListener("orientationchange", checkOrientation);
+</code></pre>
+        </article>
+    </section>
 
 
 

@@ -102,7 +102,6 @@ class Endboss extends MoveableObject {
         this.stopEndbossWalk();
         return;
       }
-      // Sobald der Endboss einmal losgelaufen ist, bleibt hadFirstContact true
       if (this.world.character.x > 1000 || this.hadFirstContact) {
         this.hadFirstContact = true;
         this.moveEndbossLeft();
@@ -112,8 +111,7 @@ class Endboss extends MoveableObject {
         this.playAnimation(this.IMAGES_WALKING);
       }
       i++;
-      // Die folgende Prüfung ist nicht mehr nötig, da hadFirstContact dauerhaft true bleibt
-    }, 200);
+          }, 200);
   }
 
   /**

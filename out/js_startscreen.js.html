@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/startscreen.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/startscreen.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Draws the start screen image and the start button on the canvas.
+ */
+function drawStartScreen() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const img = new Image();
+  img.src = "img/9_intro_outro_screens/start/startscreen_1.png";
+  img.onload = function () {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    drawStartButton();
+    drawStartSubButtons();
+  };
+  if (img.complete) {
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    drawStartButton();
+    drawStartSubButtons();
+  }
+}
+
+/**
+ * Draws the start button on the canvas.
+ */
+function drawStartButton() {
+  const btnWidth = 260;
+  const btnHeight = 60;
+  const btnX = canvas.width / 2 - btnWidth / 2;
+  const btnY = 40;
+  ctx.save();
+  ctx.globalAlpha = 0.95;
+  ctx.fillStyle = "#a0220a";
+  ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
+  ctx.strokeStyle = "#fff";
+  ctx.lineWidth = 3;
+  ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold 32px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("Start game", canvas.width / 2, btnY + btnHeight / 2);
+  ctx.restore();
+  startButtonArea = { x: btnX, y: btnY, width: btnWidth, height: btnHeight };
+}
+
+/**
+ * Draws the start sub buttons on the canvas.
+ */
+function drawStartSubButtons() {
+  const buttonWidth = 150;
+  const buttonHeight = 40;
+  const gap = 20;
+  const totalWidth = buttonWidth * 4 + gap * 3;
+  const startX = (canvas.width - totalWidth) / 2;
+  const y = canvas.height - 50;
+  const buttons = getStartSubButtonConfigs();
+  startSubButtonAreas = [];
+  buttons.forEach((btn, i) => drawSingleStartSubButton(btn, i, startX, y, buttonWidth, gap));
+}
+
+/**
+ * Returns the configuration for the start sub buttons.
+ * @returns {Array&lt;Object>} Array of button configs
+ */
+function getStartSubButtonConfigs() {
+  return [
+    { label: "Legal Notice", key: "legal" },
+    { label: "Tutorial", key: "tutorial" },
+    { label: soundOn ? "Sound Off" : "Sound On", key: "sound" },
+    { label: "Fullscreen", key: "fullscreen" },
+  ];
+}
+
+/**
+ * Draws a single start sub button and saves its area.
+ * @param {Object} btn - Button config
+ * @param {number} i - Index
+ * @param {number} startX - Start X position
+ * @param {number} y - Y position
+ * @param {number} buttonWidth - Button width
+ * @param {number} gap - Gap between buttons
+ */
+function drawSingleStartSubButton(btn, i, startX, y, buttonWidth, gap) {
+  const x = startX + i * (buttonWidth + gap);
+  ctx.save();
+  ctx.fillStyle = "rgba(160,34,10,0.9)";
+  ctx.fillRect(x, y, buttonWidth, 40);
+  ctx.fillStyle = "white";
+  ctx.font = "20px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(btn.label, x + buttonWidth / 2, y + 20);
+  ctx.restore();
+  startSubButtonAreas.push({
+    x,
+    y,
+    width: buttonWidth,
+    height: 40,
+    key: btn.key,
+  });
+}
+
+/**
+ * Handles the start sub buttons actions: tutorial, legal, sound, fullscreen.
+ * @param {Object} btn - The button object containing key and other properties.
+ */
+function handleStartSubButton(btn) {
+  if (btn.key === "tutorial") {
+    showStartButton = false;
+    showTutorialOverlay();
+  }
+  if (btn.key === "legal") {
+    showStartButton = false;
+    showLegalOverlay();
+  }
+  if (btn.key === "sound") {
+    soundOn = !soundOn;
+    handleSoundToggle();
+    drawStartScreen();
+  }
+  if (btn.key === "fullscreen") {
+    toggleFullscreen(canvas);
+  }
+}
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game.html">game</a></li><li><a href="module-screen-orientation.html">screen-orientation</a></li></ul><h3>Classes</h3><ul><li><a href="Background.html">Background</a></li><li><a href="BottlesGround.html">BottlesGround</a></li><li><a href="Character.html">Character</a></li><li><a href="Chicken.html">Chicken</a></li><li><a href="Cloud.html">Cloud</a></li><li><a href="Coins.html">Coins</a></li><li><a href="DrawableObject.html">DrawableObject</a></li><li><a href="Endboss.html">Endboss</a></li><li><a href="Keyboard.html">Keyboard</a></li><li><a href="Level.html">Level</a></li><li><a href="MoveableObject.html">MoveableObject</a></li><li><a href="StatusBar.html">StatusBar</a></li><li><a href="StatusBarBottles.html">StatusBarBottles</a></li><li><a href="StatusBarCoins.html">StatusBarCoins</a></li><li><a href="StatusBarEndboss.html">StatusBarEndboss</a></li><li><a href="ThrowableObject.html">ThrowableObject</a></li><li><a href="World.html">World</a></li></ul><h3>Global</h3><ul><li><a href="global.html#drawSingleStartSubButton">drawSingleStartSubButton</a></li><li><a href="global.html#drawStartButton">drawStartButton</a></li><li><a href="global.html#drawStartScreen">drawStartScreen</a></li><li><a href="global.html#drawStartSubButtons">drawStartSubButtons</a></li><li><a href="global.html#getStartSubButtonConfigs">getStartSubButtonConfigs</a></li><li><a href="global.html#getTouchPosition">getTouchPosition</a></li><li><a href="global.html#handleCanvasClick">handleCanvasClick</a></li><li><a href="global.html#handleMobileButtonTouch">handleMobileButtonTouch</a></li><li><a href="global.html#handleRestartButtonTouch">handleRestartButtonTouch</a></li><li><a href="global.html#handleStartButtonClick">handleStartButtonClick</a></li><li><a href="global.html#handleStartSubButton">handleStartSubButton</a></li><li><a href="global.html#handleStartSubButtonsClick">handleStartSubButtonsClick</a></li><li><a href="global.html#handleSubButtonsTouchInGame">handleSubButtonsTouchInGame</a></li><li><a href="global.html#handleTouch">handleTouch</a></li><li><a href="global.html#handleTutorialOverlayClick">handleTutorialOverlayClick</a></li><li><a href="global.html#showTutorialOverlay">showTutorialOverlay</a></li><li><a href="global.html#walkAudio">walkAudio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue May 27 2025 18:47:46 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

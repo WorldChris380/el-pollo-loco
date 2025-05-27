@@ -30,20 +30,6 @@ class DrawableObject {
     ctx.drawImage(this.img, this.x, this.y, this.width, this.height);
   }
 
-  // /**
-  //  * Draws a frame around the object (only for Character/Chicken).
-  //  * @param {CanvasRenderingContext2D} ctx
-  //  */
-  // drawFrame(ctx) {
-  //   if (this instanceof Character || this instanceof Chicken) {
-  //     ctx.beginPath();
-  //     ctx.lineWidth = "5";
-  //     ctx.strokeStyle = "blue";
-  //     ctx.rect(this.x, this.y, this.width, this.height);
-  //     ctx.stroke();
-  //   }
-  // }
-
   /**
    * Checks if this object collides with another drawable object.
    * @param {DrawableObject} drawableObject

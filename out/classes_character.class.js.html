@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: classes/character.class.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: classes/character.class.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * The Character class represents the playable character.
  * It contains animations, sounds, movement logic, and collision detection.
  * @class
@@ -101,7 +129,7 @@ class Character extends MoveableObject {
    */
   isFallingOn(enemy) {
     return (
-      this.speedY < 0 && this.y + this.height - enemy.y < 30 && this.y < enemy.y
+      this.speedY &lt; 0 &amp;&amp; this.y + this.height - enemy.y &lt; 30 &amp;&amp; this.y &lt; enemy.y
     );
   }
 
@@ -127,8 +155,8 @@ class Character extends MoveableObject {
    */
   handleMovement() {
     if (
-      (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) ||
-      (this.world.keyboard.LEFT && this.x > 0)
+      (this.world.keyboard.RIGHT &amp;&amp; this.x &lt; this.world.level.level_end_x) ||
+      (this.world.keyboard.LEFT &amp;&amp; this.x > 0)
     ) {
       if (!this.isWalking) this.playWalkSound();
       if (this.world.keyboard.RIGHT) {
@@ -151,7 +179,7 @@ class Character extends MoveableObject {
    * @private
    */
   handleJump() {
-    if (this.world.keyboard.UP && !this.isAboveGround() && !this.isJumping) {
+    if (this.world.keyboard.UP &amp;&amp; !this.isAboveGround() &amp;&amp; !this.isJumping) {
       this.jump();
       this.lastActionTime = Date.now();
       this.isSleeping = false;
@@ -232,7 +260,7 @@ class Character extends MoveableObject {
    * @private
    */
   handleJumpAnimation(now) {
-    if (!this.jumpAnimActive && this.jumpAnimFrame === 0) {
+    if (!this.jumpAnimActive &amp;&amp; this.jumpAnimFrame === 0) {
       this.startJumpAnimation(now);
     }
     if (this.shouldAdvanceJumpFrame(now)) {
@@ -262,8 +290,8 @@ class Character extends MoveableObject {
   shouldAdvanceJumpFrame(now) {
     const jumpAnimSpeed = 50;
     return (
-      this.jumpAnimActive &&
-      this.jumpAnimFrame < this.IMAGES_JUMPING.length &&
+      this.jumpAnimActive &amp;&amp;
+      this.jumpAnimFrame &lt; this.IMAGES_JUMPING.length &amp;&amp;
       (!this.lastJumpAnimTime || now - this.lastJumpAnimTime > jumpAnimSpeed)
     );
   }
@@ -329,7 +357,7 @@ class Character extends MoveableObject {
    * Plays the jump sound.
    */
   playJumpSound() {
-    if (soundOn && !this.isJumping) {
+    if (soundOn &amp;&amp; !this.isJumping) {
       this.isJumping = true;
       this.jumpAudio.currentTime = 0;
       this.jumpAudio.play();
@@ -361,7 +389,7 @@ class Character extends MoveableObject {
    * Plays the walk sound.
    */
   playWalkSound() {
-    if (soundOn && this.walkAudio.paused) {
+    if (soundOn &amp;&amp; this.walkAudio.paused) {
       this.walkAudio.currentTime = 0;
       this.walkAudio.play();
       this.isWalking = true;
@@ -392,10 +420,33 @@ class Character extends MoveableObject {
     const a = this.getCollisionBox ? this.getCollisionBox() : this;
     const b = other.getCollisionBox ? other.getCollisionBox() : other;
     return (
-      a.x + a.width > b.x &&
-      a.y + a.height > b.y &&
-      a.x < b.x + b.width &&
-      a.y < b.y + b.height
+      a.x + a.width > b.x &amp;&amp;
+      a.y + a.height > b.y &amp;&amp;
+      a.x &lt; b.x + b.width &amp;&amp;
+      a.y &lt; b.y + b.height
     );
   }
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game.html">game</a></li><li><a href="module-screen-orientation.html">screen-orientation</a></li></ul><h3>Classes</h3><ul><li><a href="Background.html">Background</a></li><li><a href="BottlesGround.html">BottlesGround</a></li><li><a href="Character.html">Character</a></li><li><a href="Chicken.html">Chicken</a></li><li><a href="Cloud.html">Cloud</a></li><li><a href="Coins.html">Coins</a></li><li><a href="DrawableObject.html">DrawableObject</a></li><li><a href="Endboss.html">Endboss</a></li><li><a href="Keyboard.html">Keyboard</a></li><li><a href="Level.html">Level</a></li><li><a href="MoveableObject.html">MoveableObject</a></li><li><a href="StatusBar.html">StatusBar</a></li><li><a href="StatusBarBottles.html">StatusBarBottles</a></li><li><a href="StatusBarCoins.html">StatusBarCoins</a></li><li><a href="StatusBarEndboss.html">StatusBarEndboss</a></li><li><a href="ThrowableObject.html">ThrowableObject</a></li><li><a href="World.html">World</a></li></ul><h3>Global</h3><ul><li><a href="global.html#drawSingleStartSubButton">drawSingleStartSubButton</a></li><li><a href="global.html#drawStartButton">drawStartButton</a></li><li><a href="global.html#drawStartScreen">drawStartScreen</a></li><li><a href="global.html#drawStartSubButtons">drawStartSubButtons</a></li><li><a href="global.html#getStartSubButtonConfigs">getStartSubButtonConfigs</a></li><li><a href="global.html#getTouchPosition">getTouchPosition</a></li><li><a href="global.html#handleCanvasClick">handleCanvasClick</a></li><li><a href="global.html#handleMobileButtonTouch">handleMobileButtonTouch</a></li><li><a href="global.html#handleRestartButtonTouch">handleRestartButtonTouch</a></li><li><a href="global.html#handleStartButtonClick">handleStartButtonClick</a></li><li><a href="global.html#handleStartSubButton">handleStartSubButton</a></li><li><a href="global.html#handleStartSubButtonsClick">handleStartSubButtonsClick</a></li><li><a href="global.html#handleSubButtonsTouchInGame">handleSubButtonsTouchInGame</a></li><li><a href="global.html#handleTouch">handleTouch</a></li><li><a href="global.html#handleTutorialOverlayClick">handleTutorialOverlayClick</a></li><li><a href="global.html#showTutorialOverlay">showTutorialOverlay</a></li><li><a href="global.html#walkAudio">walkAudio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue May 27 2025 18:47:46 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

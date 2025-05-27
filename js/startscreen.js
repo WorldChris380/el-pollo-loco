@@ -51,31 +51,50 @@ function drawStartSubButtons() {
   const totalWidth = buttonWidth * 4 + gap * 3;
   const startX = (canvas.width - totalWidth) / 2;
   const y = canvas.height - 50;
-  const buttons = [
+  const buttons = getStartSubButtonConfigs();
+  startSubButtonAreas = [];
+  buttons.forEach((btn, i) => drawSingleStartSubButton(btn, i, startX, y, buttonWidth, gap));
+}
+
+/**
+ * Returns the configuration for the start sub buttons.
+ * @returns {Array<Object>} Array of button configs
+ */
+function getStartSubButtonConfigs() {
+  return [
     { label: "Legal Notice", key: "legal" },
     { label: "Tutorial", key: "tutorial" },
     { label: soundOn ? "Sound Off" : "Sound On", key: "sound" },
     { label: "Fullscreen", key: "fullscreen" },
   ];
-  startSubButtonAreas = [];
-  buttons.forEach((btn, i) => {
-    const x = startX + i * (buttonWidth + gap);
-    ctx.save();
-    ctx.fillStyle = "rgba(160,34,10,0.9)";
-    ctx.fillRect(x, y, buttonWidth, buttonHeight);
-    ctx.fillStyle = "white";
-    ctx.font = "20px Arial";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(btn.label, x + buttonWidth / 2, y + buttonHeight / 2);
-    ctx.restore();
-    startSubButtonAreas.push({
-      x,
-      y,
-      width: buttonWidth,
-      height: buttonHeight,
-      key: btn.key,
-    });
+}
+
+/**
+ * Draws a single start sub button and saves its area.
+ * @param {Object} btn - Button config
+ * @param {number} i - Index
+ * @param {number} startX - Start X position
+ * @param {number} y - Y position
+ * @param {number} buttonWidth - Button width
+ * @param {number} gap - Gap between buttons
+ */
+function drawSingleStartSubButton(btn, i, startX, y, buttonWidth, gap) {
+  const x = startX + i * (buttonWidth + gap);
+  ctx.save();
+  ctx.fillStyle = "rgba(160,34,10,0.9)";
+  ctx.fillRect(x, y, buttonWidth, 40);
+  ctx.fillStyle = "white";
+  ctx.font = "20px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(btn.label, x + buttonWidth / 2, y + 20);
+  ctx.restore();
+  startSubButtonAreas.push({
+    x,
+    y,
+    width: buttonWidth,
+    height: 40,
+    key: btn.key,
   });
 }
 

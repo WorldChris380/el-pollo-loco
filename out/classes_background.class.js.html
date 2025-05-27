@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: classes/background.class.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,38 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: classes/background.class.js</h1>
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Represents a background image in the game.
+ * @class
+ * @extends MoveableObject
+ */
+class Background extends MoveableObject {
+  height = 480;
+  width = 720;
 
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
+  /**
+   * Creates a new Background object.
+   * @param {string} imagePath - Path to the background image.
+   * @param {number} x - X position of the background.
+   */
+  constructor(imagePath, x) {
+    super().loadImage(imagePath);
+    this.x = x;
+    this.y = 480 - this.height;
+  }
+}
+</code></pre>
+        </article>
+    </section>
 
 
 

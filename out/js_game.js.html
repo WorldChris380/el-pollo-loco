@@ -1,4 +1,32 @@
-/**
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: js/game.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: js/game.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
  * Main game logic for El Pollo Loco.
  * Initializes the canvas, world, controls, and audio.
  * Includes functions for start, sound, fullscreen, touch and click events, as well as keyboard handling.
@@ -100,10 +128,10 @@ function getCanvasCoordinates(event, canvasElement) {
  */
 function isFullscreenButton(x, y, canvasElement) {
   return (
-    x >= canvasElement.width - 190 &&
-    x <= canvasElement.width - 10 &&
-    y >= canvasElement.height - 60 &&
-    y <= canvasElement.height - 20
+    x >= canvasElement.width - 190 &amp;&amp;
+    x &lt;= canvasElement.width - 10 &amp;&amp;
+    y >= canvasElement.height - 60 &amp;&amp;
+    y &lt;= canvasElement.height - 20
   );
 }
 
@@ -139,10 +167,10 @@ function mouseOverForFullscreen(canvasElement) {
     const x = ((event.clientX - rect.left) / rect.width) * canvasElement.width;
     const y = ((event.clientY - rect.top) / rect.height) * canvasElement.height;
     if (
-      x >= canvasElement.width - 190 &&
-      x <= canvasElement.width - 10 &&
-      y >= canvasElement.height - 60 &&
-      y <= canvasElement.height - 20
+      x >= canvasElement.width - 190 &amp;&amp;
+      x &lt;= canvasElement.width - 10 &amp;&amp;
+      y >= canvasElement.height - 60 &amp;&amp;
+      y &lt;= canvasElement.height - 20
     ) {
       canvasElement.style.cursor = "pointer";
     } else {
@@ -177,13 +205,13 @@ function addSubButtonClicks(canvasElement) {
  * @private
  */
 function checkTutorialClose(x, y) {
-  if (world && world.showTutorial && world.tutorialCloseButton) {
+  if (world &amp;&amp; world.showTutorial &amp;&amp; world.tutorialCloseButton) {
     const btn = world.tutorialCloseButton;
     if (
-      x >= btn.x &&
-      x <= btn.x + btn.width &&
-      y >= btn.y &&
-      y <= btn.y + btn.height
+      x >= btn.x &amp;&amp;
+      x &lt;= btn.x + btn.width &amp;&amp;
+      y >= btn.y &amp;&amp;
+      y &lt;= btn.y + btn.height
     ) {
       world.showTutorial = false;
       world.resume();
@@ -201,13 +229,13 @@ function checkTutorialClose(x, y) {
  * @private
  */
 function checkRestartButton(x, y) {
-  if (world && world.restartButtonArea && world.character.energy === 0) {
+  if (world &amp;&amp; world.restartButtonArea &amp;&amp; world.character.energy === 0) {
     const btn = world.restartButtonArea;
     if (
-      x >= btn.x &&
-      x <= btn.x + btn.width &&
-      y >= btn.y &&
-      y <= btn.y + btn.height
+      x >= btn.x &amp;&amp;
+      x &lt;= btn.x + btn.width &amp;&amp;
+      y >= btn.y &amp;&amp;
+      y &lt;= btn.y + btn.height
     ) {
       restartGame();
       return true;
@@ -226,10 +254,10 @@ function checkRestartButton(x, y) {
  */
 function handleSubButton(btn, x, y, canvasElement) {
   if (
-    x >= btn.x &&
-    x <= btn.x + btn.width &&
-    y >= btn.y &&
-    y <= btn.y + btn.height
+    x >= btn.x &amp;&amp;
+    x &lt;= btn.x + btn.width &amp;&amp;
+    y >= btn.y &amp;&amp;
+    y &lt;= btn.y + btn.height
   ) {
     if (btn.key === "tutorial") {
       if (world) world.pause();
@@ -270,9 +298,8 @@ function handleSoundToggle() {
  * @returns {boolean}
  */
 function isMobile() {
-  return (
-    /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent) ||
-    (navigator.userAgent.includes("Macintosh") && "ontouchend" in document)
+  return /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(
+    navigator.userAgent
   );
 }
 
@@ -326,7 +353,7 @@ function handleTouch(e) {
     const y = ((touch.clientY - rect.top) / rect.height) * canvas.height;
     if (handleSubButtonsTouch(x, y)) return;
     if (
-      typeof isFullscreenButton === "function" &&
+      typeof isFullscreenButton === "function" &amp;&amp;
       isFullscreenButton(x, y, canvas)
     ) {
       toggleFullscreen(canvas);
@@ -360,7 +387,7 @@ function handleTouchEnd(e) {
 function handleMobileButtons(x, y) {
   let hit = false;
   world.mobileButtons.forEach((btn) => {
-    if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
+    if (x >= btn.x &amp;&amp; x &lt;= btn.x + btn.w &amp;&amp; y >= btn.y &amp;&amp; y &lt;= btn.y + btn.h) {
       world.pressedButtons[btn.key] = true;
       keyboard[btn.key] = true;
       hit = true;
@@ -380,10 +407,10 @@ function handleSubButtonsTouch(x, y) {
   if (world.subButtonAreas) {
     for (const btn of world.subButtonAreas) {
       if (
-        x >= btn.x &&
-        x <= btn.x + btn.width &&
-        y >= btn.y &&
-        y <= btn.y + btn.height
+        x >= btn.x &amp;&amp;
+        x &lt;= btn.x + btn.width &amp;&amp;
+        y >= btn.y &amp;&amp;
+        y &lt;= btn.y + btn.height
       ) {
         if (btn.key === "tutorial") {
           world.showTutorial = true;
@@ -405,7 +432,7 @@ function handleSubButtonsTouch(x, y) {
 function isMobileDevice() {
   return (
     /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent) ||
-    (navigator.userAgent.includes("Macintosh") && "ontouchend" in document)
+    (navigator.userAgent.includes("Macintosh") &amp;&amp; "ontouchend" in document)
   );
 }
 
@@ -415,3 +442,26 @@ function closeTutorialOverlay() {
     world.resume();
   }
 }
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-game.html">game</a></li><li><a href="module-screen-orientation.html">screen-orientation</a></li></ul><h3>Classes</h3><ul><li><a href="Background.html">Background</a></li><li><a href="BottlesGround.html">BottlesGround</a></li><li><a href="Character.html">Character</a></li><li><a href="Chicken.html">Chicken</a></li><li><a href="Cloud.html">Cloud</a></li><li><a href="Coins.html">Coins</a></li><li><a href="DrawableObject.html">DrawableObject</a></li><li><a href="Endboss.html">Endboss</a></li><li><a href="Keyboard.html">Keyboard</a></li><li><a href="Level.html">Level</a></li><li><a href="MoveableObject.html">MoveableObject</a></li><li><a href="StatusBar.html">StatusBar</a></li><li><a href="StatusBarBottles.html">StatusBarBottles</a></li><li><a href="StatusBarCoins.html">StatusBarCoins</a></li><li><a href="StatusBarEndboss.html">StatusBarEndboss</a></li><li><a href="ThrowableObject.html">ThrowableObject</a></li><li><a href="World.html">World</a></li></ul><h3>Global</h3><ul><li><a href="global.html#drawSingleStartSubButton">drawSingleStartSubButton</a></li><li><a href="global.html#drawStartButton">drawStartButton</a></li><li><a href="global.html#drawStartScreen">drawStartScreen</a></li><li><a href="global.html#drawStartSubButtons">drawStartSubButtons</a></li><li><a href="global.html#getStartSubButtonConfigs">getStartSubButtonConfigs</a></li><li><a href="global.html#getTouchPosition">getTouchPosition</a></li><li><a href="global.html#handleCanvasClick">handleCanvasClick</a></li><li><a href="global.html#handleMobileButtonTouch">handleMobileButtonTouch</a></li><li><a href="global.html#handleRestartButtonTouch">handleRestartButtonTouch</a></li><li><a href="global.html#handleStartButtonClick">handleStartButtonClick</a></li><li><a href="global.html#handleStartSubButton">handleStartSubButton</a></li><li><a href="global.html#handleStartSubButtonsClick">handleStartSubButtonsClick</a></li><li><a href="global.html#handleSubButtonsTouchInGame">handleSubButtonsTouchInGame</a></li><li><a href="global.html#handleTouch">handleTouch</a></li><li><a href="global.html#handleTutorialOverlayClick">handleTutorialOverlayClick</a></li><li><a href="global.html#showTutorialOverlay">showTutorialOverlay</a></li><li><a href="global.html#walkAudio">walkAudio</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Tue May 27 2025 18:47:46 GMT+0200 (Mitteleuropäische Sommerzeit)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>

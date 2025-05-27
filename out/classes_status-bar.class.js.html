@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: classes/status-bar.class.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,71 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: classes/status-bar.class.js</h1>
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Status bar for the character's health.
+ * @class
+ * @extends DrawableObject
+ */
+class StatusBar extends DrawableObject {
+  IMAGES = [
+    "img/7_statusbars/1_statusbar/2_statusbar_health/blue/0.png",
+    "img/7_statusbars/1_statusbar/2_statusbar_health/blue/20.png",
+    "img/7_statusbars/1_statusbar/2_statusbar_health/blue/40.png",
+    "img/7_statusbars/1_statusbar/2_statusbar_health/blue/60.png",
+    "img/7_statusbars/1_statusbar/2_statusbar_health/blue/80.png",
+    "img/7_statusbars/1_statusbar/2_statusbar_health/blue/100.png",
+  ];
 
+  percentage = 100;
 
-    <h3> </h3>
+  /**
+   * Creates a new StatusBar instance.
+   */
+  constructor() {
+    super();
+    this.loadImages(this.IMAGES);
+    this.x = 30;
+    this.y = 0;
+    this.height = 50;
+    this.width = 200;
+    this.setPercentage(100);
+  }
 
+  /**
+   * Sets the health percentage and updates the image.
+   * @param {number} percentage
+   */
+  setPercentage(percentage) {
+    this.percentage = percentage;
+    let imagePath = this.IMAGES[this.resolveImage()];
+    this.img = this.images[imagePath];
+  }
 
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
+  /**
+   * Determines the correct image for the current health percentage.
+   * @returns {number}
+   */
+  resolveImage() {
+    if (this.percentage == 100) return 5;
+    else if (this.percentage > 80) return 4;
+    else if (this.percentage > 60) return 3;
+    else if (this.percentage > 40) return 2;
+    else if (this.percentage > 20) return 1;
+    else return 0;
+  }
+}
+</code></pre>
+        </article>
+    </section>
 
 
 

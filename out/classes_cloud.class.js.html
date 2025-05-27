@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: classes/cloud.class.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,45 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: classes/cloud.class.js</h1>
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Represents a cloud in the game.
+ * @class
+ * @extends MoveableObject
+ */
+class Cloud extends MoveableObject {
+  y = 20;
+  height = 350;
+  width = 500;
+  speed = 0.15;
 
+  /**
+   * Creates a new cloud at a random position.
+   */
+  constructor() {
+    super().loadImage("img/5_background/layers/4_clouds/1.png");
+    this.x = Math.random() * 500;
+    this.moveLeft();
+  }
 
-    <h3> </h3>
-
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
+  /**
+   * Animates the cloud (moves it to the left).
+   */
+  animate() {
+    this.moveLeft();
+  }
+}
+</code></pre>
+        </article>
+    </section>
 
 
 

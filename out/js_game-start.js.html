@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Home</title>
+    <title>JSDoc: Source: js/game-start.js</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,32 +17,101 @@
 
 <div id="main">
 
-    <h1 class="page-title">Home</h1>
+    <h1 class="page-title">Source: js/game-start.js</h1>
 
     
 
 
 
     
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Handles click events on the canvas during the start screen.
+ * Checks if the tutorial overlay, start button, or sub buttons were clicked.
+ * @param {MouseEvent} event - The mouse event.
+ */
+function handleCanvasClick(event) {
+  const { x, y } = getCanvasCoordinates(event, canvas);
+  if (handleTutorialOverlayClick(x, y)) return;
+  if (handleStartButtonClick(x, y)) return;
+  if (handleStartSubButtonsClick(x, y)) return;
+}
 
+/**
+ * Handles clicks on the tutorial overlay close button.
+ * Closes the tutorial overlay if the close button was clicked.
+ * @param {number} x - X coordinate of the click.
+ * @param {number} y - Y coordinate of the click.
+ * @returns {boolean} True if the overlay was closed, otherwise false.
+ */
+function handleTutorialOverlayClick(x, y) {
+  if (showTutorialOverlayActive &amp;&amp; tutorialCloseButtonArea) {
+    if (
+      x >= tutorialCloseButtonArea.x &amp;&amp;
+      x &lt;= tutorialCloseButtonArea.x + tutorialCloseButtonArea.width &amp;&amp;
+      y >= tutorialCloseButtonArea.y &amp;&amp;
+      y &lt;= tutorialCloseButtonArea.y + tutorialCloseButtonArea.height
+    ) {
+      showTutorialOverlayActive = false;
+      showStartButton = true;
+      drawStartScreen();
+      return true;
+    }
+  }
+  return false;
+}
 
-    <h3> </h3>
+/**
+ * Handles clicks on the start button.
+ * Starts the game if the start button was clicked.
+ * @param {number} x - X coordinate of the click.
+ * @param {number} y - Y coordinate of the click.
+ * @returns {boolean} True if the game was started, otherwise false.
+ */
+function handleStartButtonClick(x, y) {
+  if (
+    showStartButton &amp;&amp;
+    startButtonArea &amp;&amp;
+    x >= startButtonArea.x &amp;&amp;
+    x &lt;= startButtonArea.x + startButtonArea.width &amp;&amp;
+    y >= startButtonArea.y &amp;&amp;
+    y &lt;= startButtonArea.y + startButtonArea.height
+  ) {
+    showStartButton = false;
+    document.getElementById("startscreen").style.display = "none";
+    document.getElementById("canvas").style.display = "block";
+    init();
+    return true;
+  }
+  return false;
+}
 
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
+/**
+ * Handles clicks on the start screen sub buttons (e.g. tutorial, legal, sound, fullscreen).
+ * Executes the corresponding action if a sub button was clicked.
+ * @param {number} x - X coordinate of the click.
+ * @param {number} y - Y coordinate of the click.
+ * @returns {boolean} True if a sub button was clicked, otherwise false.
+ */
+function handleStartSubButtonsClick(x, y) {
+  if (showStartButton &amp;&amp; startSubButtonAreas) {
+    for (const btn of startSubButtonAreas) {
+      if (
+        x >= btn.x &amp;&amp;
+        x &lt;= btn.x + btn.width &amp;&amp;
+        y >= btn.y &amp;&amp;
+        y &lt;= btn.y + btn.height
+      ) {
+        handleStartSubButton(btn);
+        return true;
+      }
+    }
+  }
+  return false;
+}</code></pre>
+        </article>
+    </section>
 
 
 
