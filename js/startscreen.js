@@ -155,54 +155,6 @@ window.onload = function () {
   addCanvasMousemoveListener();
 };
 
-/**
- * Adds the mousemove event listener to the canvas for hover detection.
- */
 function addCanvasMousemoveListener() {
   canvas.addEventListener("mousemove", handleCanvasMousemove);
-}
-
-/**
- * Handles mouse movement over the canvas.
- * Updates mouse position, checks for hover, and redraws the start screen.
- * @param {MouseEvent} e - The mouse event.
- */
-function handleCanvasMousemove(e) {
-  const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;
-  const mouseY = e.clientY - rect.top;
-  let hovering = isHoveringButton(mouseX, mouseY);
-  canvas.style.cursor = hovering ? "pointer" : "default";
-  mousePos.x = mouseX;
-  mousePos.y = mouseY;
-  drawStartScreen();
-}
-
-/**
- * Checks if the mouse is hovering over any button area.
- * @param {number} mouseX - The X coordinate of the mouse.
- * @param {number} mouseY - The Y coordinate of the mouse.
- * @returns {boolean} True if hovering over a button, otherwise false.
- */
-function isHoveringButton(mouseX, mouseY) {
-  if (
-    startButtonArea &&
-    mouseX >= startButtonArea.x &&
-    mouseX <= startButtonArea.x + startButtonArea.width &&
-    mouseY >= startButtonArea.y &&
-    mouseY <= startButtonArea.y + startButtonArea.height
-  ) {
-    return true;
-  }
-  for (const btn of startSubButtonAreas) {
-    if (
-      mouseX >= btn.x &&
-      mouseX <= btn.x + btn.width &&
-      mouseY >= btn.y &&
-      mouseY <= btn.y + btn.height
-    ) {
-      return true;
-    }
-  }
-  return false;
 }

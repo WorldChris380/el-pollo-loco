@@ -43,7 +43,6 @@ function init() {
   world = new World(canvas, keyboard);
   let canvasElement = document.getElementById("canvas");
   addFullscreenClick(canvasElement);
-  mouseOverForFullscreen(canvasElement);
   addSubButtonClicks(canvasElement);
   setupMobileCanvasControls(canvas);
   if (isMobile()) {
@@ -58,8 +57,9 @@ function init() {
  */
 function setupMobileCanvasControls(canvas) {
   if (!isMobile()) return;
-
-  canvas.addEventListener("touchstart", function (e) {}, { passive: false });
+  canvas.addEventListener("touchstart", function (e) {
+    console.log("touchstart event");
+  }, { passive: false });
   canvas.addEventListener("touchstart", handleTouch, { passive: false });
   canvas.addEventListener("touchend", handleTouchEnd, { passive: false });
 }
@@ -126,28 +126,6 @@ function toggleFullscreen(canvasElement) {
     else if (canvasElement.msRequestFullscreen)
       canvasElement.msRequestFullscreen();
   }
-}
-
-/**
- * Changes the mouse cursor when hovering over the fullscreen button.
- * @param {HTMLCanvasElement} canvasElement - The canvas element.
- */
-function mouseOverForFullscreen(canvasElement) {
-  canvasElement.addEventListener("mousemove", function (event) {
-    const rect = canvasElement.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * canvasElement.width;
-    const y = ((event.clientY - rect.top) / rect.height) * canvasElement.height;
-    if (
-      x >= canvasElement.width - 190 &&
-      x <= canvasElement.width - 10 &&
-      y >= canvasElement.height - 60 &&
-      y <= canvasElement.height - 20
-    ) {
-      canvasElement.style.cursor = "pointer";
-    } else {
-      canvasElement.style.cursor = "default";
-    }
-  });
 }
 
 /**

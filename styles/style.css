@@ -1,5 +1,5 @@
 html {
-  background-image: url("img/body-background.png");
+  background-image: url("/img/body-background.png");
   background-size: cover;
   background-repeat: no-repeat;
   min-height: 100vh;
