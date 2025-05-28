@@ -108,3 +108,19 @@ canvas {
     display: none;
   }
 }
+
+@media only screen and (min-width: 600px) and (max-width: 1200px) {
+  html,
+  body {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+}

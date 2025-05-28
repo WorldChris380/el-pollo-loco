@@ -20,8 +20,16 @@ class ThrowableObject extends MoveableObject {
     "img/6_salsa_bottle/bottle_rotation/bottle_splash/6_bottle_splash.png",
   ];
 
+  IMAGES_BOTTLE_ROTATION = [
+    "img/6_salsa_bottle/bottle_rotation/1_bottle_rotation.png",
+    "img/6_salsa_bottle/bottle_rotation/2_bottle_rotation.png",
+    "img/6_salsa_bottle/bottle_rotation/3_bottle_rotation.png",
+    "img/6_salsa_bottle/bottle_rotation/4_bottle_rotation.png",
+  ];
+
   isBroken = false;
   brokenAnimationIndex = 0;
+  rotationFrame = 0;
 
   /**
    * Creates a new throwable object.
@@ -31,14 +39,17 @@ class ThrowableObject extends MoveableObject {
    * @param {World} world - The game world.
    */
   constructor(x, y, otherDirection, world) {
-    super().loadImage(this.IMAGES[0]);
+    super().loadImage(this.IMAGES_BOTTLE_ROTATION[0]);
     this.loadImages(this.IMAGES);
     this.loadImages(this.IMAGE_BOTTLE_BROKEN);
+    this.loadImages(this.IMAGES_BOTTLE_ROTATION);
     this.x = x;
     this.y = y;
     this.height = 70;
     this.width = 80;
     this.world = world;
+    this.rotationFrame = 0;
+    this.startRotationAnimation();
     this.throw();
     this.otherDirection = otherDirection;
   }
@@ -92,6 +103,27 @@ class ThrowableObject extends MoveableObject {
         if (this.y >= 355) this.break();
       }
     }, 25);
+  }
+  /**
+   * Spinning the bottle while it is thrown.
+   */
+  draw(ctx) {
+    super.draw(ctx);
+  }
+
+  /**
+   * Starts the bottle rotation animation while flying.
+   */
+  startRotationAnimation() {
+    this.rotationInterval = setInterval(() => {
+      if (!this.isBroken) {
+        this.rotationFrame =
+          (this.rotationFrame + 1) % this.IMAGES_BOTTLE_ROTATION.length;
+        this.img = this.images[this.IMAGES_BOTTLE_ROTATION[this.rotationFrame]];
+      } else {
+        clearInterval(this.rotationInterval);
+      }
+    }, 60); // 60ms pro Frame, ca. 16 FPS
   }
 
   /**

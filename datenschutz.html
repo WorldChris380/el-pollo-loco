@@ -14,10 +14,20 @@
     <!-- CSS -->
     <link rel="stylesheet" href="style.css" />
     <style>
+      html {
+        margin: 0;
+      }
+
+      html,
+      body {
+        overflow-x: hidden;
+      }
+
       body {
         font-family: Arial, Helvetica, sans-serif;
         background-size: cover;
         background-repeat: no-repeat;
+        position: relative;
       }
 
       #back-to-game {
@@ -26,7 +36,6 @@
 
       #legal-notice {
         max-width: 800px;
-        margin: 0 auto;
         margin-top: 50px;
         padding: 20px;
         border-radius: 10px;

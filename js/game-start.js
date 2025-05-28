@@ -51,8 +51,6 @@ function handleStartButtonClick(x, y) {
     y <= startButtonArea.y + startButtonArea.height
   ) {
     showStartButton = false;
-    document.getElementById("startscreen").style.display = "none";
-    document.getElementById("canvas").style.display = "block";
     init();
     return true;
   }

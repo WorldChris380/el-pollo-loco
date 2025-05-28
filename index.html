@@ -54,31 +54,12 @@
     <script src="/classes/level.class.js"></script>
     <script src="/levels/level1.js"></script>
     <script src="/js/screen-orientation.js"></script>
+    <script src="/js/startscreen.js"></script>
     <script src="/js/game.js"></script>
     <script src="/js/game-start.js"></script>
-    <script src="/js/startscreen.js"></script>
     <script src="/js/audio.js"></script>
   </head>
   <body>
-    <div
-      id="startscreen"
-      style="
-        position: absolute;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 10;
-      "
-    >
-      <img
-        id="startscreen-img"
-        src="img/9_intro_outro_screens/start/startscreen_1.png"
-        alt="Startscreen"
-        style="max-width: 80vw; max-height: 60vh; margin-bottom: 40px"
-      />
-    </div>
-
     <!-- Legal Notice Overlay -->
     <div
       id="legal-overlay"
@@ -116,7 +97,9 @@
       </div>
     </div>
     <h1>El Pollo Loco by Christian Böhme</h1>
-    <canvas id="canvas" width="720" height="480"></canvas>
+    <div id="canvasDiv">
+      <canvas id="canvas" width="720" height="480"></canvas>
+    </div>
   </body>
   <div
     id="rotate-overlay"

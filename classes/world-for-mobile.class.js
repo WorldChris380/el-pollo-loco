@@ -188,6 +188,11 @@ function saveTutorialCloseButtonArea() {
 function showLegalOverlay() {
   window.location.href = "datenschutz.html";
 }
+
+function showImprintOverlay() {
+  window.location.href = "imprint.html";
+}
+
 // Und für das Schließen-Event:
 function closeLegalOverlay() {
   document.getElementById("legal-overlay").style.display = "none";

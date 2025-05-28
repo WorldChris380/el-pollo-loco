@@ -28,13 +28,11 @@ let showStartButton = true;
 window.onload = function () {
   canvas = document.getElementById("canvas");
   ctx = canvas.getContext("2d");
-  document.getElementById("startscreen").style.display = "none";
-  document.getElementById("canvas").style.display = "block";
   showStartButton = true;
   drawStartScreen();
   canvas.addEventListener("click", handleCanvasClick);
+  centerCanvasMobile();
 };
-
 /**
  * Initializes the game, world, fullscreen, sub buttons, and mobile controls.
  */
@@ -171,6 +169,13 @@ function addSubButtonClicks(canvasElement) {
   });
 }
 
+/**
+ * Checks if the home button was clicked after game over or endboss defeat.
+ * If so, reloads the page to return to the start screen.
+ * @param {number} x - The X coordinate of the click.
+ * @param {number} y - The Y coordinate of the click.
+ * @returns {boolean} True if the home button was clicked, otherwise false.
+ */
 function checkHomeButton(x, y) {
   if (
     world &&
@@ -184,7 +189,7 @@ function checkHomeButton(x, y) {
       y >= btn.y &&
       y <= btn.y + btn.height
     ) {
-      window.location.reload(); 
+      window.location.reload();
       return true;
     }
   }
@@ -300,11 +305,25 @@ function isMobile() {
     /Mobi|Android|iPhone|iPad|iPod|Tablet|Opera Mini|IEMobile|WPDesktop/i.test(
       navigator.userAgent
     ) ||
-    (navigator.userAgent.includes("Macintosh") && "ontouchend" in document) ||
-    (navigator.userAgent.includes("Android") && "ontouchend" in document) ||
+    (navigator.userAgent.includes("Macintosh") &&
+      navigator.maxTouchPoints &&
+      navigator.maxTouchPoints > 1) ||
     typeof window.orientation !== "undefined" ||
     (window.innerWidth <= 1024 && "ontouchstart" in window)
   );
+}
+
+/**
+ * Checks if the game is running on a mobile device.
+ * @returns {boolean}
+ */
+function centerCanvasMobile() {
+  if (isMobile()) {
+    document.body.style.display = "flex";
+    document.body.style.alignItems = "center";
+    document.body.style.justifyContent = "center";
+    document.body.style.minHeight = "100vh";
+  }
 }
 
 /**
@@ -312,8 +331,8 @@ function isMobile() {
  */
 function restartGame() {
   if (world) {
-    world.gameOverSoundPlayed = true; 
-    world.gameWinSoundPlayed = true; 
+    world.gameOverSoundPlayed = true;
+    world.gameWinSoundPlayed = true;
   }
   if (typeof winAudio !== "undefined") {
     winAudio.pause();
@@ -332,7 +351,8 @@ function restartGame() {
 
 /**
  * Keyboard event: key pressed.
- * @param {KeyboardEvent} event
+ * Sets the corresponding property in the keyboard object to true.
+ * @param {KeyboardEvent} event - The keyboard event.
  */
 window.addEventListener("keydown", (event) => {
   if (event.keyCode == 39 || event.keyCode == 68) keyboard.RIGHT = true;
@@ -345,7 +365,8 @@ window.addEventListener("keydown", (event) => {
 
 /**
  * Keyboard event: key released.
- * @param {KeyboardEvent} event
+ * Sets the corresponding property in the keyboard object to false.
+ * @param {KeyboardEvent} event - The keyboard event.
  */
 window.addEventListener("keyup", (event) => {
   if (event.keyCode == 39 || event.keyCode == 68) keyboard.RIGHT = false;
@@ -358,6 +379,7 @@ window.addEventListener("keyup", (event) => {
 
 /**
  * Handles the end of a touch event for mobile controls.
+ * Resets all pressed mobile buttons and updates the keyboard state.
  * @param {TouchEvent} e - The touch event.
  */
 function handleTouchEnd(e) {
@@ -366,11 +388,4 @@ function handleTouchEnd(e) {
     world.pressedButtons[btn.key] = false;
     keyboard[btn.key] = false;
   });
-}
-
-function closeTutorialOverlay() {
-  if (world) {
-    world.showTutorial = false;
-    world.resume();
-  }
 }

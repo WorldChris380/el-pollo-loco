@@ -34,7 +34,7 @@ window.CharacterAnimations = {
     setInterval(() => {
       this.handleMovement();
       this.handleJump();
-      if (!this.isDead()) {
+      if (!this.isDead() && !this.world.endboss.isDead) {
         this.world.camera_x = -this.x + 100;
       }
       this.handleHurt();
@@ -51,7 +51,9 @@ window.CharacterAnimations = {
    */
   handleMovement() {
     const endboss = this.world.endboss;
-    let maxRight = endboss ? endboss.x - this.width : this.world.level.level_end_x;
+    let maxRight = endboss
+      ? endboss.x - this.width
+      : this.world.level.level_end_x;
     if (
       (this.world.keyboard.RIGHT && this.x < maxRight) ||
       (this.world.keyboard.LEFT && this.x > 0)

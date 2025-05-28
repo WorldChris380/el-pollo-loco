@@ -42,7 +42,7 @@ class StatusBarBottles extends DrawableObject {
    * @returns {number}
    */
   resolveImage() {
-    if (this.amountOfBottlesOnGround == 5) return 5;
+    if (this.amountOfBottlesOnGround >= 5) return 5;
     else if (this.amountOfBottlesOnGround == 4) return 4;
     else if (this.amountOfBottlesOnGround == 3) return 3;
     else if (this.amountOfBottlesOnGround == 2) return 2;

@@ -85,7 +85,7 @@ class World {
     if (
       this.keyboard.ENTER &&
       this.collectedBottles > 0 &&
-      (!this.lastThrowTime || now - this.lastThrowTime > 1000)
+      (!this.lastThrowTime || now - this.lastThrowTime > 300)
     ) {
       this.collectedBottles--;
       this.statusBarBottles.setAmount(this.collectedBottles);
@@ -103,6 +103,7 @@ class World {
 
   /**
    * Checks and collects collisions with bottles.
+   * Respawns a new bottle at a random X position after collection.
    */
   collidingWithBottles() {
     for (let i = this.bottlesOnGround.length - 1; i >= 0; i--) {
@@ -110,6 +111,11 @@ class World {
         this.bottlesOnGround.splice(i, 1);
         this.collectedBottles++;
         this.statusBarBottles.setAmount(this.collectedBottles);
+        let newBottle = new BottlesGround();
+        while (Math.abs(newBottle.x - this.character.x) < 150) {
+          newBottle.x = 250 + Math.random() * 1000;
+        }
+        this.bottlesOnGround.push(newBottle);
       }
     }
   }
@@ -258,9 +264,14 @@ class World {
   /**
    * Draws mobile control buttons on the canvas.
    */
- drawMobileControls() {
-    this._setupMobileButtons();
-    this.mobileButtons.forEach((btn) => this._drawMobileButton(btn));
-    console.log('Mobile Buttons:', this.mobileButtons);
-}
+  drawMobileControls() {
+    if (
+      isMobile() &&
+      typeof this.world.drawMobileControls === "function" &&
+      this.world.character.energy > 0 &&
+      !(this.world.endboss && this.world.endboss.isDead) // Endscreen: keine Buttons!
+    ) {
+      this.world.drawMobileControls();
+    }
+  }
 }

@@ -28,7 +28,8 @@ class WorldUI {
     if (
       isMobile() &&
       typeof this.world.drawMobileControls === "function" &&
-      this.world.character.energy > 0
+      this.world.character.energy > 0 &&
+      !(this.world.endboss && this.world.endboss.isDead)
     ) {
       this.world.drawMobileControls();
     }
@@ -64,6 +65,7 @@ class WorldUI {
    * Draws the Game Over image and the restart button.
    */
   drawGameOverImage() {
+    this.world.paused = true;
     if (!this.world.gameOverSoundPlayed && soundOn) {
       if (typeof winAudio !== "undefined" && !winAudio.paused) {
         winAudio.pause();
@@ -93,6 +95,7 @@ class WorldUI {
    * Handles the game win sound and image display.
    */
   drawGameWinImage() {
+    this.world.paused = true;
     this._handleGameWinSound();
     this._drawGameWinImage();
   }
