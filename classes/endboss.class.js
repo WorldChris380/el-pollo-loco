@@ -8,7 +8,7 @@ class Endboss extends MoveableObject {
   width = 300;
   y = 0;
   hadFirstContact = false;
-  speed = 6;
+  speed = 30;
   energy = 100;
   isDead = false;
   lastHitSound = 0;
@@ -44,7 +44,7 @@ class Endboss extends MoveableObject {
     this.loadImages(this.IMAGES_WALKING);
     this.loadImages(this.IMAGES_ATTACK);
 
-    this.x = 1500;
+    this.x = 2500;
     this.world = world;
     this.endboss = world.endboss;
     this.animate();
@@ -55,7 +55,7 @@ class Endboss extends MoveableObject {
    */
   hit() {
     if (this.isDead) return;
-    this.energy -= 5;
+    this.energy -= 25;
     if (this.energy < 0) {
       this.energy = 0;
       this.isDead = true;
@@ -111,7 +111,7 @@ class Endboss extends MoveableObject {
         this.playAnimation(this.IMAGES_WALKING);
       }
       i++;
-          }, 200);
+    }, 200);
   }
 
   /**
@@ -140,5 +140,14 @@ class Endboss extends MoveableObject {
       width: this.width - 100,
       height: this.height,
     };
+  }
+
+  /**
+   * Updates the endboss's position and animation.
+   */
+  update() {
+    if (!this.isDead && !this.isColliding(this.world.character)) {
+      this.moveEndbossLeft();
+    }
   }
 }

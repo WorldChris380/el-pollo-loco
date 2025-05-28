@@ -49,7 +49,7 @@ function init() {
   setupMobileCanvasControls(canvas);
 
   // Mobile Controls initialisieren
-  if (isMobileDevice()) {
+  if (isMobile()) {
     world.mobileButtons = [];
     world.pressedButtons = {};
   }
@@ -162,11 +162,33 @@ function addSubButtonClicks(canvasElement) {
     const y = ((event.clientY - rect.top) / rect.height) * canvasElement.height;
     if (checkTutorialClose(x, y)) return;
     if (checkRestartButton(x, y)) return;
+    if (checkHomeButton(x, y)) return; // <--- NEU
     if (!world || !world.subButtonAreas) return;
     world.subButtonAreas.forEach((btn) =>
       handleSubButton(btn, x, y, canvasElement)
     );
   });
+}
+
+function checkHomeButton(x, y) {
+  if (
+    world &&
+    world.homeButtonArea &&
+    (world.character.energy === 0 || (world.endboss && world.endboss.isDead))
+  ) {
+    const btn = world.homeButtonArea;
+    if (
+      x >= btn.x &&
+      x <= btn.x + btn.width &&
+      y >= btn.y &&
+      y <= btn.y + btn.height
+    ) {
+      // Hier zur Startseite zurückkehren:
+      window.location.reload(); // oder eigene Startscreen-Logik
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -201,7 +223,11 @@ function checkTutorialClose(x, y) {
  * @private
  */
 function checkRestartButton(x, y) {
-  if (world && world.restartButtonArea && world.character.energy === 0) {
+  if (
+    world &&
+    world.restartButtonArea &&
+    (world.character.energy === 0 || (world.endboss && world.endboss.isDead))
+  ) {
     const btn = world.restartButtonArea;
     if (
       x >= btn.x &&
@@ -271,8 +297,13 @@ function handleSoundToggle() {
  */
 function isMobile() {
   return (
-    /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent) ||
-    (navigator.userAgent.includes("Macintosh") && "ontouchend" in document)
+    /Mobi|Android|iPhone|iPad|iPod|Tablet|Opera Mini|IEMobile|WPDesktop/i.test(
+      navigator.userAgent
+    ) ||
+    (navigator.userAgent.includes("Macintosh") && "ontouchend" in document) ||
+    (navigator.userAgent.includes("Android") && "ontouchend" in document) ||
+    typeof window.orientation !== "undefined" ||
+    (window.innerWidth <= 1024 && "ontouchstart" in window)
   );
 }
 
@@ -280,11 +311,24 @@ function isMobile() {
  * Restarts the game after Game Over.
  */
 function restartGame() {
-  gameAudio.currentTime = 0;
-  if (soundOn) gameAudio.play();
-  world = null;
-  canvas = document.getElementById("canvas");
-  world = new World(canvas, keyboard);
+  if (world) {
+    world.gameOverSoundPlayed = true; // <-- Sofort setzen!
+    world.gameWinSoundPlayed = true; // Optional: auch für Win-Sound
+  }
+  if (typeof winAudio !== "undefined") {
+    winAudio.pause();
+    winAudio.currentTime = 0;
+  }
+  if (typeof gameOverAudio !== "undefined") {
+    gameOverAudio.pause();
+    gameOverAudio.currentTime = 0;
+  }
+  // Flags für neues Spiel zurücksetzen (nach init!)
+  init();
+  if (world) {
+    world.gameWinSoundPlayed = false;
+    world.gameOverSoundPlayed = false;
+  }
 }
 
 /**
@@ -314,31 +358,6 @@ window.addEventListener("keyup", (event) => {
 });
 
 /**
- * Handles touch events for mobile controls, sub buttons, tutorial, and restart.
- * @param {TouchEvent} e - The touch event.
- */
-function handleTouch(e) {
-  if (e.cancelable) e.preventDefault();
-  if (!world) return;
-  for (let touch of e.touches) {
-    const rect = canvas.getBoundingClientRect();
-    const x = ((touch.clientX - rect.left) / rect.width) * canvas.width;
-    const y = ((touch.clientY - rect.top) / rect.height) * canvas.height;
-    if (handleSubButtonsTouch(x, y)) return;
-    if (
-      typeof isFullscreenButton === "function" &&
-      isFullscreenButton(x, y, canvas)
-    ) {
-      toggleFullscreen(canvas);
-      return;
-    }
-    if (handleMobileButtons(x, y)) return;
-    if (checkTutorialClose(x, y)) return;
-    if (checkRestartButton(x, y)) return;
-  }
-}
-
-/**
  * Handles the end of a touch event for mobile controls.
  * @param {TouchEvent} e - The touch event.
  */
@@ -348,65 +367,6 @@ function handleTouchEnd(e) {
     world.pressedButtons[btn.key] = false;
     keyboard[btn.key] = false;
   });
-}
-
-/**
- * Checks mobile control buttons on touch.
- * @param {number} x - X coordinate.
- * @param {number} y - Y coordinate.
- * @returns {boolean}
- * @private
- */
-function handleMobileButtons(x, y) {
-  let hit = false;
-  world.mobileButtons.forEach((btn) => {
-    if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
-      world.pressedButtons[btn.key] = true;
-      keyboard[btn.key] = true;
-      hit = true;
-    }
-  });
-  return hit;
-}
-
-/**
- * Checks sub buttons on touch.
- * @param {number} x - X coordinate.
- * @param {number} y - Y coordinate.
- * @returns {boolean}
- * @private
- */
-function handleSubButtonsTouch(x, y) {
-  if (world.subButtonAreas) {
-    for (const btn of world.subButtonAreas) {
-      if (
-        x >= btn.x &&
-        x <= btn.x + btn.width &&
-        y >= btn.y &&
-        y <= btn.y + btn.height
-      ) {
-        if (btn.key === "tutorial") {
-          world.showTutorial = true;
-          world.pause();
-        }
-        if (btn.key === "legal") window.location.href = "datenschutz.html";
-        if (btn.key === "sound") {
-          soundOn = !soundOn;
-          handleSoundToggle();
-        }
-        if (btn.key === "fullscreen") toggleFullscreen(canvas);
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-function isMobileDevice() {
-  return (
-    /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent) ||
-    (navigator.userAgent.includes("Macintosh") && "ontouchend" in document)
-  );
 }
 
 function closeTutorialOverlay() {

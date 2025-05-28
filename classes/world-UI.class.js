@@ -3,6 +3,7 @@ class WorldUI {
     this.world = world;
     this.ctx = world.ctx;
     this.canvas = world.canvas;
+    this.winImage = null; // <--- NEU
   }
 
   /**
@@ -13,9 +14,17 @@ class WorldUI {
     this.ctx.translate(this.world.camera_x, 0);
     this.addObjectsToCanvas(this.world.level.background);
     this.ctx.translate(-this.world.camera_x, 0);
-    if (this.world.showTutorial) this.drawTutorial();
-    else if (this.world.character.energy === 0) this.drawGameOverImage();
-    else this._drawGameObjects();
+
+    if (this.world.showTutorial) {
+      this.drawTutorial();
+    } else if (this.world.character.energy === 0) {
+      this.drawGameOverImage();
+    } else if (this.world.endboss && this.world.endboss.isDead) {
+      this.drawGameWinImage();
+    } else {
+      this._drawGameObjects();
+    }
+
     if (
       isMobile() &&
       typeof this.world.drawMobileControls === "function" &&
@@ -56,8 +65,14 @@ class WorldUI {
    */
   drawGameOverImage() {
     if (!this.world.gameOverSoundPlayed && soundOn) {
-      gameOverAudio.currentTime = 0;
-      gameOverAudio.play();
+      if (typeof winAudio !== "undefined" && !winAudio.paused) {
+        winAudio.pause();
+        winAudio.currentTime = 0;
+      }
+      if (typeof gameOverAudio !== "undefined" && gameOverAudio.paused) {
+        gameOverAudio.currentTime = 0;
+        gameOverAudio.play().catch(() => {});
+      }
       this.world.gameOverSoundPlayed = true;
     }
     const img = new Image();
@@ -71,6 +86,43 @@ class WorldUI {
     };
     if (img.complete) {
       this._drawGameOverImage(img, centerX, centerY, width, height);
+    }
+  }
+
+  /**
+   * Draws the Game Win image and the restart button.
+   */
+  drawGameWinImage() {
+    if (!this.world.gameWinSoundPlayed && soundOn) {
+      // Stoppe ggf. andere Sounds, um Konflikte zu vermeiden
+      if (typeof gameOverAudio !== "undefined" && !gameOverAudio.paused) {
+        gameOverAudio.pause();
+        gameOverAudio.currentTime = 0;
+      }
+      winAudio.currentTime = 0;
+      winAudio.play().catch(() => {}); // Fehler abfangen, falls play() unterbrochen wird
+      this.world.gameWinSoundPlayed = true;
+    }
+    if (!this.winImage) {
+      this.winImage = new Image();
+      this.winImage.src = "img/You won, you lost/You Won B.png";
+      this.winImage.onload = () =>
+        this._drawGameOverImage(
+          this.winImage,
+          this.canvas.width / 2,
+          this.canvas.height / 2,
+          400,
+          200
+        );
+    }
+    if (this.winImage.complete) {
+      this._drawGameOverImage(
+        this.winImage,
+        this.canvas.width / 2,
+        this.canvas.height / 2,
+        400,
+        200
+      );
     }
   }
 
@@ -94,7 +146,43 @@ class WorldUI {
       height
     );
     this.ctx.restore();
-    this.drawRestartButton(centerX, centerY + height / 2 + 40);
+
+    // New Game Button
+    const buttonWidth = 200;
+    const buttonHeight = 50;
+    const btnX = centerX - buttonWidth - 20;
+    const btnY = centerY + height / 2 + 40;
+    this._drawRestartButtonRect(
+      btnX,
+      btnY,
+      buttonWidth,
+      buttonHeight,
+      btnX + buttonWidth / 2,
+      "New game"
+    );
+    this.world.restartButtonArea = {
+      x: btnX,
+      y: btnY,
+      width: buttonWidth,
+      height: buttonHeight,
+    };
+
+    // Home Button
+    const homeBtnX = centerX + 20;
+    this._drawRestartButtonRect(
+      homeBtnX,
+      btnY,
+      buttonWidth,
+      buttonHeight,
+      homeBtnX + buttonWidth / 2,
+      "Home"
+    );
+    this.world.homeButtonArea = {
+      x: homeBtnX,
+      y: btnY,
+      width: buttonWidth,
+      height: buttonHeight,
+    };
   }
 
   /**
@@ -125,7 +213,7 @@ class WorldUI {
    * @param {number} buttonHeight
    * @param {number} labelX
    */
-  _drawRestartButtonRect(btnX, btnY, buttonWidth, buttonHeight, labelX) {
+  _drawRestartButtonRect(btnX, btnY, buttonWidth, buttonHeight, labelX, label) {
     this.ctx.save();
     this.ctx.globalAlpha = 1;
     this.ctx.fillStyle = "#a0220a";
@@ -137,7 +225,7 @@ class WorldUI {
     this.ctx.font = "bold 26px Arial";
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
-    this.ctx.fillText("New game", labelX, btnY + buttonHeight / 2);
+    this.ctx.fillText(label, labelX, btnY + buttonHeight / 2);
     this.ctx.restore();
   }
 
@@ -159,11 +247,9 @@ class WorldUI {
     const buttonHeight = 40;
     const gap = 20;
     const totalWidth = buttonWidth * 4 + gap * 3;
-    const startX = (this.canvas.width - totalWidth) / 2;
+    const startX = 370;
     const y = this.canvas.height - 50;
     const buttons = [
-      { label: "Legal Notice", key: "legal" },
-      { label: "Tutorial", key: "tutorial" },
       { label: soundOn ? "Sound Off" : "Sound On", key: "sound" },
       { label: "Fullscreen", key: "fullscreen" },
     ];

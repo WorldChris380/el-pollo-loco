@@ -6,10 +6,20 @@ function handleTouch(e) {
   if (e.cancelable) e.preventDefault();
   if (!world) return;
   for (let touch of e.touches) {
-    const { x, y } = getTouchPosition(touch);
+    const rect = canvas.getBoundingClientRect();
+    const x = ((touch.clientX - rect.left) / rect.width) * canvas.width;
+    const y = ((touch.clientY - rect.top) / rect.height) * canvas.height;
 
-    if (handleSubButtonsTouchInGame(x, y)) return;
+    // 1. Mobile Steuerung zuerst prüfen!
+    if (handleMobileButtonTouch(x, y)) return;
 
+    // 2. Dann Home/Restart/Tutorial prüfen
+    if (checkHomeButton(x, y)) return;
+    if (checkRestartButton(x, y)) return;
+    if (checkTutorialClose(x, y)) return;
+
+    // 3. SubButtons (Sound, Fullscreen, etc.)
+    if (handleSubButtonsTouch(x, y)) return;
     if (
       typeof isFullscreenButton === "function" &&
       isFullscreenButton(x, y, canvas)
@@ -17,8 +27,6 @@ function handleTouch(e) {
       toggleFullscreen(canvas);
       return;
     }
-    if (handleMobileButtonTouch(x, y)) return;
-    handleRestartButtonTouch(x, y);
   }
 }
 
@@ -88,6 +96,58 @@ function handleSubButtonsTouchInGame(x, y) {
         y <= btn.y + btn.height
       ) {
         if (btn.key === "tutorial") world.showTutorial = true;
+        if (btn.key === "legal") window.location.href = "datenschutz.html";
+        if (btn.key === "sound") {
+          soundOn = !soundOn;
+          handleSoundToggle();
+        }
+        if (btn.key === "fullscreen") toggleFullscreen(canvas);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * Checks mobile control buttons on touch.
+ * @param {number} x - X coordinate.
+ * @param {number} y - Y coordinate.
+ * @returns {boolean}
+ * @private
+ */
+function handleMobileButtons(x, y) {
+  let hit = false;
+  world.mobileButtons.forEach((btn) => {
+    if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
+      world.pressedButtons[btn.key] = true;
+      keyboard[btn.key] = true;
+      hit = true;
+    }
+  });
+  return hit;
+}
+
+/**
+ * Checks sub buttons on touch.
+ * @param {number} x - X coordinate.
+ * @param {number} y - Y coordinate.
+ * @returns {boolean}
+ * @private
+ */
+function handleSubButtonsTouch(x, y) {
+  if (world.subButtonAreas) {
+    for (const btn of world.subButtonAreas) {
+      if (
+        x >= btn.x &&
+        x <= btn.x + btn.width &&
+        y >= btn.y &&
+        y <= btn.y + btn.height
+      ) {
+        if (btn.key === "tutorial") {
+          world.showTutorial = true;
+          world.pause();
+        }
         if (btn.key === "legal") window.location.href = "datenschutz.html";
         if (btn.key === "sound") {
           soundOn = !soundOn;

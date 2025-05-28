@@ -23,6 +23,20 @@ class BottlesGround extends DrawableObject {
   }
 
   /**
+   * Returns a narrower collision box for the bottle.
+   * @returns {{x:number, y:number, width:number, height:number}}
+   */
+  getCollisionBox() {
+    const shrink = 40;
+    return {
+      x: this.x + shrink,
+      y: this.y,
+      width: this.width - 2 * shrink,
+      height: this.height,
+    };
+  }
+
+  /**
    * Sets the number of bottles and updates the image.
    * @param {number} amountOfBottlesOnGround
    */

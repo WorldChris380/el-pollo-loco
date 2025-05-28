@@ -1,6 +1,7 @@
 /**
  * The Character class represents the playable character.
  * It contains animations, sounds, movement logic, and collision detection.
+ * Most animation and movement logic is delegated to the CharacterAnimations object.
  * @class
  * @extends MoveableObject
  */
@@ -14,11 +15,14 @@ class Character extends MoveableObject {
     "img/2_character_pepe/2_walk/W-26.png",
   ];
 
-  IMAGES_JUMPING = [
+  IMAGES_JUMPING_UP = [
     "img/2_character_pepe/3_jump/J-31.png",
     "img/2_character_pepe/3_jump/J-32.png",
     "img/2_character_pepe/3_jump/J-33.png",
     "img/2_character_pepe/3_jump/J-34.png",
+  ];
+
+  IMAGES_JUMPING_FALLING = [
     "img/2_character_pepe/3_jump/J-35.png",
     "img/2_character_pepe/3_jump/J-36.png",
     "img/2_character_pepe/3_jump/J-37.png",
@@ -73,6 +77,7 @@ class Character extends MoveableObject {
   jumpAnimActive = false;
   jumpInitiated = false;
   lastJumpAnimTime = 0;
+  jumpPhase = null;
 
   /**
    * Initializes the character, loads images and sounds.
@@ -80,7 +85,8 @@ class Character extends MoveableObject {
   constructor() {
     super().loadImage("img/2_character_pepe/2_walk/W-21.png");
     this.loadImages(this.IMAGES_WALKING);
-    this.loadImages(this.IMAGES_JUMPING);
+    this.loadImages(this.IMAGES_JUMPING_UP);
+    this.loadImages(this.IMAGES_JUMPING_FALLING);
     this.loadImages(this.IMAGES_IDLE);
     this.loadImages(this.IMAGES_SLEEPING);
     this.loadImages(this.IMAGES_HURT);
@@ -106,209 +112,6 @@ class Character extends MoveableObject {
   }
 
   /**
-   * Starts the animation and movement intervals.
-   */
-  animate() {
-    setInterval(() => {
-      this.handleMovement();
-      this.handleJump();
-      this.world.camera_x = -this.x + 100;
-      this.handleHurt();
-    }, 5000 / 144);
-
-    setInterval(() => {
-      this.handleAnimation();
-    }, 50);
-  }
-
-  /**
-   * Handles movement logic.
-   * @private
-   */
-  handleMovement() {
-    if (
-      (this.world.keyboard.RIGHT && this.x < this.world.level.level_end_x) ||
-      (this.world.keyboard.LEFT && this.x > 0)
-    ) {
-      if (!this.isWalking) this.playWalkSound();
-      if (this.world.keyboard.RIGHT) {
-        this.moveRight();
-        this.otherDirection = false;
-      }
-      if (this.world.keyboard.LEFT) {
-        this.moveLeft();
-        this.otherDirection = true;
-      }
-      this.lastActionTime = Date.now();
-      this.isSleeping = false;
-    } else {
-      this.stopWalkSound();
-    }
-  }
-
-  /**
-   * Handles jump logic.
-   * @private
-   */
-  handleJump() {
-    if (this.world.keyboard.UP && !this.isAboveGround() && !this.isJumping) {
-      this.jump();
-      this.lastActionTime = Date.now();
-      this.isSleeping = false;
-      this.playJumpSound();
-      this.jumpInitiated = true;
-      this.jumpAnimFrame = 0;
-      this.jumpAnimActive = true;
-    }
-  }
-
-  /**
-   * Handles hurt status and sound.
-   * @private
-   */
-  handleHurt() {
-    if (this.isHurt()) {
-      if (!this.wasHurt) {
-        this.playHurtSound();
-        this.wasHurt = true;
-      }
-    } else {
-      this.wasHurt = false;
-    }
-  }
-
-  /**
-   * Handles animation frames.
-   * Splits logic into smaller helper functions.
-   * @private
-   */
-  handleAnimation() {
-    const now = Date.now();
-
-    if (this.isDead()) {
-      this.handleDeadAnimation();
-      return;
-    }
-
-    if (this.isHurt()) {
-      this.handleHurtAnimation(now);
-      return;
-    }
-
-    if (this.isAboveGround()) {
-      this.handleJumpAnimation(now);
-      return;
-    }
-
-    this.handleGroundAnimation(now);
-  }
-
-  /**
-   * Handles animation when character is dead.
-   * @private
-   */
-  handleDeadAnimation() {
-    this.playAnimation(this.IMAGES_DEAD);
-    this.stopWalkSound();
-    this.isSleeping = false;
-    this.jumpInitiated = false;
-  }
-
-  /**
-   * Handles animation when character is hurt.
-   * @param {number} now - Current timestamp.
-   * @private
-   */
-  handleHurtAnimation(now) {
-    this.playAnimation(this.IMAGES_HURT);
-    this.isSleeping = false;
-    this.lastActionTime = now;
-    this.jumpInitiated = false;
-  }
-
-  /**
-   * Handles jump animation logic.
-   * @param {number} now - Current timestamp.
-   * @private
-   */
-  handleJumpAnimation(now) {
-    if (!this.jumpAnimActive && this.jumpAnimFrame === 0) {
-      this.startJumpAnimation(now);
-    }
-    if (this.shouldAdvanceJumpFrame(now)) {
-      this.advanceJumpFrame(now);
-    } else if (!this.jumpAnimActive || this.jumpAnimFrame >= this.IMAGES_JUMPING.length) {
-      this.finishJumpAnimation();
-    }
-    this.isSleeping = false;
-  }
-
-  /**
-   * Starts the jump animation.
-   * @param {number} now - Current timestamp.
-   * @private
-   */
-  startJumpAnimation(now) {
-    this.jumpAnimActive = true;
-    this.lastJumpAnimTime = now;
-  }
-
-  /**
-   * Determines if the jump frame should advance.
-   * @param {number} now - Current timestamp.
-   * @returns {boolean}
-   * @private
-   */
-  shouldAdvanceJumpFrame(now) {
-    const jumpAnimSpeed = 50;
-    return (
-      this.jumpAnimActive &&
-      this.jumpAnimFrame < this.IMAGES_JUMPING.length &&
-      (!this.lastJumpAnimTime || now - this.lastJumpAnimTime > jumpAnimSpeed)
-    );
-  }
-
-  /**
-   * Advances the jump animation frame.
-   * @param {number} now - Current timestamp.
-   * @private
-   */
-  advanceJumpFrame(now) {
-    this.img = this.images[this.IMAGES_JUMPING[this.jumpAnimFrame]];
-    this.jumpAnimFrame++;
-    this.lastJumpAnimTime = now;
-  }
-
-  /**
-   * Finishes the jump animation.
-   * @private
-   */
-  finishJumpAnimation() {
-    this.img = this.images[this.IMAGES_JUMPING[this.IMAGES_JUMPING.length - 1]];
-    this.jumpAnimActive = false;
-  }
-
-  /**
-   * Handles animation when character is on the ground.
-   * @param {number} now - Current timestamp.
-   * @private
-   */
-  handleGroundAnimation(now) {
-    this.isJumping = false;
-    this.jumpInitiated = false;
-    this.jumpAnimActive = false;
-    this.jumpAnimFrame = 0;
-    this.lastJumpAnimTime = 0;
-
-    if (this.world.keyboard.RIGHT || this.world.keyboard.LEFT) {
-      this.playAnimation(this.IMAGES_WALKING);
-      this.isSleeping = false;
-    } else {
-      this.handleIdleOrSleep(now);
-    }
-  }
-
-  /**
    * Handles idle or sleep animation depending on inactivity.
    * @param {number} now - Current timestamp.
    * @private
@@ -329,10 +132,10 @@ class Character extends MoveableObject {
    * Plays the jump sound.
    */
   playJumpSound() {
-    if (soundOn && !this.isJumping) {
-      this.isJumping = true;
+    if (soundOn && this.jumpAudio.paused) {
       this.jumpAudio.currentTime = 0;
-      this.jumpAudio.play();
+      this.jumpAudio.play().catch(() => {});
+      this.isJumping = true;
     }
   }
 
@@ -351,9 +154,9 @@ class Character extends MoveableObject {
    * Plays the hurt sound.
    */
   playHurtSound() {
-    if (soundOn) {
+    if (soundOn && this.hurtAudio.paused) {
       this.hurtAudio.currentTime = 0;
-      this.hurtAudio.play();
+      this.hurtAudio.play().catch(() => {});
     }
   }
 
@@ -363,7 +166,7 @@ class Character extends MoveableObject {
   playWalkSound() {
     if (soundOn && this.walkAudio.paused) {
       this.walkAudio.currentTime = 0;
-      this.walkAudio.play();
+      this.walkAudio.play().catch(() => {});
       this.isWalking = true;
     }
   }
@@ -374,11 +177,11 @@ class Character extends MoveableObject {
    * @returns {{x:number, y:number, width:number, height:number}}
    */
   getCollisionBox() {
-    const fakeHeight = this.height - 150;
+    const fakeHeight = this.height - 130;
     return {
-      x: this.x + 60,
+      x: this.x + 40,
       y: this.y + (this.height - fakeHeight),
-      width: this.width - 120,
+      width: this.width - 80,
       height: fakeHeight,
     };
   }
@@ -397,5 +200,106 @@ class Character extends MoveableObject {
       a.x < b.x + b.width &&
       a.y < b.y + b.height
     );
+  }
+
+  /**
+   * Handles the jump animation logic.
+   * Delegates to CharacterAnimations.
+   * @param {number} now - Current timestamp.
+   */
+  handleJumpAnimation(now) {
+    window.CharacterAnimations.handleJumpAnimation.call(this, now);
+  }
+
+  /**
+   * Handles character movement logic.
+   * Delegates to CharacterAnimations.
+   */
+  handleMovement() {
+    window.CharacterAnimations.handleMovement.call(this);
+  }
+
+  /**
+   * Handles the main animation logic.
+   * Delegates to CharacterAnimations.
+   */
+  handleAnimation() {
+    window.CharacterAnimations.handleAnimation.call(this);
+  }
+
+  /**
+   * Handles the jump logic (jump initiation).
+   * Delegates to CharacterAnimations.
+   */
+  handleJump() {
+    window.CharacterAnimations.handleJump.call(this);
+  }
+
+  /**
+   * Determines if the jump frame should advance.
+   * Delegates to CharacterAnimations.
+   * @param {number} now - Current timestamp.
+   * @returns {boolean}
+   */
+  shouldAdvanceJumpFrame(now) {
+    return window.CharacterAnimations.shouldAdvanceJumpFrame.call(this, now);
+  }
+
+  /**
+   * Sets the current frame for the jump up animation.
+   * Delegates to CharacterAnimations.
+   */
+  setJumpUpFrame() {
+    window.CharacterAnimations.setJumpUpFrame.call(this);
+  }
+
+  /**
+   * Sets the current frame for the falling animation.
+   * Delegates to CharacterAnimations.
+   */
+  setJumpFallingFrame() {
+    window.CharacterAnimations.setJumpFallingFrame.call(this);
+  }
+
+  /**
+   * Handles hurt status and sound.
+   * Delegates to CharacterAnimations.
+   */
+  handleHurt() {
+    window.CharacterAnimations.handleHurt.call(this);
+  }
+
+  /**
+   * Starts the animation and movement intervals.
+   * Delegates to CharacterAnimations.
+   */
+  animate() {
+    window.CharacterAnimations.animate.call(this);
+  }
+
+  /**
+   * Handles animation when character is on the ground.
+   * Delegates to CharacterAnimations.
+   * @param {number} now - Current timestamp.
+   */
+  handleGroundAnimation(now) {
+    window.CharacterAnimations.handleGroundAnimation.call(this, now);
+  }
+
+  /**
+   * Handles animation when character is hurt.
+   * Delegates to CharacterAnimations.
+   * @param {number} now - Current timestamp.
+   */
+  handleHurtAnimation(now) {
+    window.CharacterAnimations.handleHurtAnimation.call(this, now);
+  }
+
+  /**
+   * Handles actions when character is dead.
+   * Delegates to CharacterAnimations.
+   */
+  handleDeadAnimation() {
+    window.CharacterAnimations.handleDeadAnimation.call(this);
   }
 }

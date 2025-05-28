@@ -4,18 +4,20 @@
  * @returns {Level} A new Level object with predefined enemies, clouds, and backgrounds.
  */
 function createLevel1() {
-  return new Level(
-    [
+  const level = {
+    enemies: [
       // enemies
       new Chicken(),
       new Chicken(),
       new Chicken(),
+      new Chicken(),
+      new Chicken(),
     ],
-    [
+    clouds: [
       // clouds
       new Cloud(),
     ],
-    [
+    background: [
       // background
       new Background("img/5_background/layers/air.png", -719),
       new Background("img/5_background/layers/3_third_layer/2.png", -719),
@@ -33,6 +35,12 @@ function createLevel1() {
       new Background("img/5_background/layers/3_third_layer/1.png", 719 * 2),
       new Background("img/5_background/layers/2_second_layer/1.png", 719 * 2),
       new Background("img/5_background/layers/1_first_layer/1.png", 719 * 2),
-    ]
-  );
+      new Background("img/5_background/layers/air.png", 719 * 3),
+      new Background("img/5_background/layers/3_third_layer/2.png", 719 * 3),
+      new Background("img/5_background/layers/2_second_layer/2.png", 719 * 3),
+      new Background("img/5_background/layers/1_first_layer/2.png", 719 * 3),
+    ],
+    level_end_x: 719 * 3,
+  };
+  return level;
 }

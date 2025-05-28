@@ -54,7 +54,7 @@ class MoveableObject extends DrawableObject {
    * Reduces the object's energy when hit.
    */
   hit() {
-    this.energy -= 0.05;
+    this.energy -= 0.25;
     if (this.energy < 0) {
       this.energy = 0;
     } else {

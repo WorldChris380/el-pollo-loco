@@ -10,3 +10,4 @@ const gameOverAudio = new Audio("audio/game-over.wav");
 const coinAudio = new Audio("audio/coin.mp3");
 const endbossWalkAudio = new Audio("audio/chicken.wav");
 const bottleBreakAudio = new Audio("audio/broken-glass.wav");
+const winAudio = new Audio("audio/win.wav");

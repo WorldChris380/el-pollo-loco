@@ -11,7 +11,7 @@ class DrawableObject {
   height = 150;
   width = 100;
   currentImage = 0;
-  amountOfBottlesOnGround = 10;
+  amountOfBottlesOnGround = 20;
 
   /**
    * Loads a single image.
@@ -37,7 +37,9 @@ class DrawableObject {
    */
   isCollidingWithDrawable(drawableObject) {
     const a = this.getCollisionBox ? this.getCollisionBox() : this;
-    const b = drawableObject.getCollisionBox ? drawableObject.getCollisionBox() : drawableObject;
+    const b = drawableObject.getCollisionBox
+      ? drawableObject.getCollisionBox()
+      : drawableObject;
     return (
       a.x + a.width > b.x &&
       a.y + a.height > b.y &&

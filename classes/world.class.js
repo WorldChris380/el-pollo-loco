@@ -164,7 +164,13 @@ class World {
    * @returns {boolean}
    */
   isColliding(obj1, obj2) {
-    const a = obj1.getCollisionBox ? obj1.getCollisionBox() : obj1;
+    // Für Endboss: Flasche volle Hitbox, sonst wie gehabt
+    const a =
+      obj1 instanceof ThrowableObject && obj2 instanceof Endboss
+        ? { x: obj1.x, y: obj1.y, width: obj1.width, height: obj1.height }
+        : obj1.getCollisionBox
+        ? obj1.getCollisionBox()
+        : obj1;
     const b = obj2.getCollisionBox ? obj2.getCollisionBox() : obj2;
     return (
       a.x + a.width > b.x &&
@@ -206,7 +212,7 @@ class World {
    * Creates bottles on the ground.
    */
   createBottlesOnGround() {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 5; i++) {
       let bottle = new BottlesGround();
       this.bottlesOnGround.push(bottle);
     }
@@ -216,7 +222,7 @@ class World {
    * Creates coins on the field.
    */
   createCoins() {
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 5; i++) {
       let coin = new Coins();
       this.coins.push(coin);
     }
@@ -258,16 +264,10 @@ class World {
   }
 
   /**
-   * Pauses the game.
+   * Draws mobile control buttons on the canvas.
    */
-  pause() {
-    this.paused = true;
-  }
-
-  /**
-   * Resumes the game.
-   */
-  resume() {
-    this.paused = false;
+  drawMobileControls() {
+    this._setupMobileButtons();
+    this.mobileButtons.forEach((btn) => this._drawMobileButton(btn));
   }
 }

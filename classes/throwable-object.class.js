@@ -38,9 +38,9 @@ class ThrowableObject extends MoveableObject {
     this.y = y;
     this.height = 70;
     this.width = 80;
+    this.world = world;
     this.throw();
     this.otherDirection = otherDirection;
-    this.world = world;
   }
 
   /**
@@ -82,19 +82,90 @@ class ThrowableObject extends MoveableObject {
    * Throws the bottle and animates its trajectory.
    */
   throw() {
+    if (this.world.character.isSleeping) this.wakeCharacter();
     this.speedY = 18;
     this.applyGravity();
     this.throwInterval = setInterval(() => {
       if (!this.isBroken) {
-        if (this.otherDirection) {
-          this.x -= 6;
-        } else {
-          this.x += 6;
-        }
-        if (this.y >= 355) {
-          this.break();
-        }
+        this.moveBottle();
+        this.checkEnemyCollision();
+        if (this.y >= 355) this.break();
       }
     }, 25);
+  }
+
+  /**
+   * Wakes up the character if sleeping.
+   */
+  wakeCharacter() {
+    this.world.character.isSleeping = false;
+    this.world.character.lastActionTime = Date.now();
+    this.world.character.playAnimation(this.world.character.IMAGES_IDLE);
+  }
+
+  /**
+   * Moves the bottle in the correct direction.
+   */
+  moveBottle() {
+    if (this.otherDirection) this.x -= 6;
+    else this.x += 6;
+  }
+
+  /**
+   * Checks collision with enemies using a slimmer hitbox.
+   */
+  checkEnemyCollision() {
+    if (this.world && this.world.enemies) {
+      this.world.enemies.forEach((enemy) => {
+        if (
+          this.isCollidingWithSlimEnemy(enemy) &&
+          !enemy.isDead &&
+          !(enemy instanceof Endboss)
+        ) {
+          if (typeof enemy.die === "function") enemy.die();
+          else {
+            enemy.isDead = true;
+            if (enemy.handleDeadAnimation) enemy.handleDeadAnimation();
+          }
+          this.break();
+        }
+      });
+    }
+  }
+
+  /**
+   * Checks collision with a slimmer enemy hitbox.
+   * @param {Object} enemy
+   * @returns {boolean}
+   */
+  isCollidingWithSlimEnemy(enemy) {
+    const shrink = 20;
+    const a = this.getCollisionBox();
+    const b = {
+      x: enemy.x + shrink,
+      y: enemy.y,
+      width: enemy.width - 2 * shrink,
+      height: enemy.height,
+    };
+    return (
+      a.x + a.width > b.x &&
+      a.y + a.height > b.y &&
+      a.x < b.x + b.width &&
+      a.y < b.y + b.height
+    );
+  }
+
+  /**
+   * Returns a narrower collision box for the bottle.
+   * @returns {{x:number, y:number, width:number, height:number}}
+   */
+  getCollisionBox() {
+    const shrink = 30;
+    return {
+      x: this.x + shrink,
+      y: this.y,
+      width: this.width - 2 * shrink,
+      height: this.height,
+    };
   }
 }
