@@ -57,14 +57,6 @@ class World {
     requestAnimationFrame(() => this.drawLoop());
   }
 
-  pause() {
-    this.paused = true;
-  }
-
-  resume() {
-    this.paused = false;
-  }
-
   /**
    * Sets the reference to the world in the character.
    */
@@ -266,8 +258,9 @@ class World {
   /**
    * Draws mobile control buttons on the canvas.
    */
-  drawMobileControls() {
+ drawMobileControls() {
     this._setupMobileButtons();
     this.mobileButtons.forEach((btn) => this._drawMobileButton(btn));
-  }
+    console.log('Mobile Buttons:', this.mobileButtons);
+}
 }

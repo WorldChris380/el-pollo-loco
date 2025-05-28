@@ -6,19 +6,17 @@
 function createLevel1() {
   const level = {
     enemies: [
-      // enemies
       new Chicken(),
       new Chicken(),
       new Chicken(),
       new Chicken(),
-      new Chicken(),
+      new YellowChicken(),
+      new YellowChicken(),
+      new YellowChicken(),
+      new YellowChicken(),
     ],
-    clouds: [
-      // clouds
-      new Cloud(),
-    ],
+    clouds: [new Cloud()],
     background: [
-      // background
       new Background("img/5_background/layers/air.png", -719),
       new Background("img/5_background/layers/3_third_layer/2.png", -719),
       new Background("img/5_background/layers/2_second_layer/2.png", -719),

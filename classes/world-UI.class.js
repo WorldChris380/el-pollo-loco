@@ -90,19 +90,34 @@ class WorldUI {
   }
 
   /**
-   * Draws the Game Win image and the restart button.
+   * Handles the game win sound and image display.
    */
   drawGameWinImage() {
+    this._handleGameWinSound();
+    this._drawGameWinImage();
+  }
+
+  /**
+   * Plays the game win sound if not already played.
+   * @private
+   */
+  _handleGameWinSound() {
     if (!this.world.gameWinSoundPlayed && soundOn) {
-      // Stoppe ggf. andere Sounds, um Konflikte zu vermeiden
       if (typeof gameOverAudio !== "undefined" && !gameOverAudio.paused) {
         gameOverAudio.pause();
         gameOverAudio.currentTime = 0;
       }
       winAudio.currentTime = 0;
-      winAudio.play().catch(() => {}); // Fehler abfangen, falls play() unterbrochen wird
+      winAudio.play().catch(() => {});
       this.world.gameWinSoundPlayed = true;
     }
+  }
+
+  /**
+   * Draws the game win image on the canvas.
+   * @private
+   */
+  _drawGameWinImage() {
     if (!this.winImage) {
       this.winImage = new Image();
       this.winImage.src = "img/You won, you lost/You Won B.png";
@@ -127,15 +142,24 @@ class WorldUI {
   }
 
   /**
-   * Draws the Game Over image and restart button.
+   * Draws the Game Over image and both buttons.
    * @private
-   * @param {HTMLImageElement} img
-   * @param {number} centerX
-   * @param {number} centerY
-   * @param {number} width
-   * @param {number} height
+   * @param {HTMLImageElement} img - The image to draw.
+   * @param {number} centerX - X center of the image.
+   * @param {number} centerY - Y center of the image.
+   * @param {number} width - Width of the image.
+   * @param {number} height - Height of the image.
    */
   _drawGameOverImage(img, centerX, centerY, width, height) {
+    this._drawGameOverBackground(img, centerX, centerY, width, height);
+    this._drawGameOverButtons(centerX, centerY, width, height);
+  }
+
+  /**
+   * Draws the Game Over background image.
+   * @private
+   */
+  _drawGameOverBackground(img, centerX, centerY, width, height) {
     this.ctx.save();
     this.ctx.globalAlpha = 0.95;
     this.ctx.drawImage(
@@ -146,12 +170,19 @@ class WorldUI {
       height
     );
     this.ctx.restore();
+  }
 
-    // New Game Button
+  /**
+   * Draws the New Game and Home buttons.
+   * @private
+   */
+  _drawGameOverButtons(centerX, centerY, width, height) {
     const buttonWidth = 200;
     const buttonHeight = 50;
-    const btnX = centerX - buttonWidth - 20;
     const btnY = centerY + height / 2 + 40;
+
+    // New Game Button
+    const btnX = centerX - buttonWidth - 20;
     this._drawRestartButtonRect(
       btnX,
       btnY,
@@ -166,8 +197,6 @@ class WorldUI {
       width: buttonWidth,
       height: buttonHeight,
     };
-
-    // Home Button
     const homeBtnX = centerX + 20;
     this._drawRestartButtonRect(
       homeBtnX,

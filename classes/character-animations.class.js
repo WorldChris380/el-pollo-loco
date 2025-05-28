@@ -52,7 +52,6 @@ window.CharacterAnimations = {
   handleMovement() {
     const endboss = this.world.endboss;
     let maxRight = endboss ? endboss.x - this.width : this.world.level.level_end_x;
-
     if (
       (this.world.keyboard.RIGHT && this.x < maxRight) ||
       (this.world.keyboard.LEFT && this.x > 0)
@@ -138,22 +137,18 @@ window.CharacterAnimations = {
    */
   handleAnimation() {
     const now = Date.now();
-
     if (this.isDead()) {
       this.handleDeadAnimation();
       return;
     }
-
     if (this.isHurt()) {
       this.handleHurtAnimation(now);
       return;
     }
-
     if (this.isAboveGround()) {
       this.handleJumpAnimation(now);
       return;
     }
-
     this.handleGroundAnimation(now);
   },
 

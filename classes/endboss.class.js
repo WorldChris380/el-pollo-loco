@@ -93,6 +93,16 @@ class Endboss extends MoveableObject {
   }
 
   /**
+   * Checks if the endboss is in the viewport of the camera.
+   * @returns {boolean} True if the endboss is in the viewport, false otherwise.
+   */
+  isInViewport() {
+    const cameraLeft = Math.abs(this.world.camera_x);
+    const cameraRight = cameraLeft + this.world.canvas.width;
+    return this.x + this.width > cameraLeft && this.x < cameraRight;
+  }
+
+  /**
    * Animates the endboss (walking, attacking, dying).
    */
   animate() {
@@ -102,7 +112,10 @@ class Endboss extends MoveableObject {
         this.stopEndbossWalk();
         return;
       }
-      if (this.world.character.x > 1000 || this.hadFirstContact) {
+      if (
+        this.isInViewport() &&
+        (this.world.character.x > 1000 || this.hadFirstContact)
+      ) {
         this.hadFirstContact = true;
         this.moveEndbossLeft();
         this.playAnimation(this.IMAGES_ATTACK);

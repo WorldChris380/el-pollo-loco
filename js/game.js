@@ -1,3 +1,4 @@
+window.handleTouch = handleTouch;
 /**
  * Main game logic for El Pollo Loco.
  * Initializes the canvas, world, controls, and audio.
@@ -47,8 +48,6 @@ function init() {
   mouseOverForFullscreen(canvasElement);
   addSubButtonClicks(canvasElement);
   setupMobileCanvasControls(canvas);
-
-  // Mobile Controls initialisieren
   if (isMobile()) {
     world.mobileButtons = [];
     world.pressedButtons = {};
@@ -61,6 +60,8 @@ function init() {
  */
 function setupMobileCanvasControls(canvas) {
   if (!isMobile()) return;
+
+  canvas.addEventListener("touchstart", function (e) {}, { passive: false });
   canvas.addEventListener("touchstart", handleTouch, { passive: false });
   canvas.addEventListener("touchend", handleTouchEnd, { passive: false });
 }
@@ -183,8 +184,7 @@ function checkHomeButton(x, y) {
       y >= btn.y &&
       y <= btn.y + btn.height
     ) {
-      // Hier zur Startseite zurückkehren:
-      window.location.reload(); // oder eigene Startscreen-Logik
+      window.location.reload(); 
       return true;
     }
   }
@@ -312,8 +312,8 @@ function isMobile() {
  */
 function restartGame() {
   if (world) {
-    world.gameOverSoundPlayed = true; // <-- Sofort setzen!
-    world.gameWinSoundPlayed = true; // Optional: auch für Win-Sound
+    world.gameOverSoundPlayed = true; 
+    world.gameWinSoundPlayed = true; 
   }
   if (typeof winAudio !== "undefined") {
     winAudio.pause();
@@ -323,7 +323,6 @@ function restartGame() {
     gameOverAudio.pause();
     gameOverAudio.currentTime = 0;
   }
-  // Flags für neues Spiel zurücksetzen (nach init!)
   init();
   if (world) {
     world.gameWinSoundPlayed = false;
