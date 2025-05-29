@@ -3,28 +3,51 @@ class WorldUI {
     this.world = world;
     this.ctx = world.ctx;
     this.canvas = world.canvas;
-    this.winImage = null; // <--- NEU
+    this.winImage = null;
+    this.gameOverUI = new WorldUIGameOver(this);
   }
 
   /**
    * Draws the game field and all objects.
    */
   draw() {
+    this._clearAndDrawBackground();
+    this._drawMainOrOverlay();
+    this._drawMobileControlsIfNeeded();
+  }
+
+  /**
+   * Clears the canvas and draws the background.
+   * @private
+   */
+  _clearAndDrawBackground() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.ctx.translate(this.world.camera_x, 0);
     this.addObjectsToCanvas(this.world.level.background);
     this.ctx.translate(-this.world.camera_x, 0);
+  }
 
+  /**
+   * Draws either the main game objects or overlays (tutorial, game over, win).
+   * @private
+   */
+  _drawMainOrOverlay() {
     if (this.world.showTutorial) {
       this.drawTutorial();
     } else if (this.world.character.energy === 0) {
-      this.drawGameOverImage();
+      this.gameOverUI.drawGameOverImage();
     } else if (this.world.endboss && this.world.endboss.isDead) {
-      this.drawGameWinImage();
+      this.gameOverUI.drawGameWinImage();
     } else {
       this._drawGameObjects();
     }
+  }
 
+  /**
+   * Draws mobile controls if on mobile and game is running.
+   * @private
+   */
+  _drawMobileControlsIfNeeded() {
     if (
       isMobile() &&
       typeof this.world.drawMobileControls === "function" &&
@@ -40,6 +63,17 @@ class WorldUI {
    * @private
    */
   _drawGameObjects() {
+    this._drawWorldObjects();
+    this._drawStatusBars();
+    this.drawSubButtons();
+    this._drawMobileControlsIfActive();
+  }
+
+  /**
+   * Draws all world objects (clouds, character, enemies, items).
+   * @private
+   */
+  _drawWorldObjects() {
     this.ctx.translate(this.world.camera_x, 0);
     this.addObjectsToCanvas(this.world.level.clouds);
     this.addToCanvas(this.world.character);
@@ -48,56 +82,30 @@ class WorldUI {
     this.addObjectsToCanvas(this.world.throwableObjects);
     this.addObjectsToCanvas(this.world.coins);
     this.ctx.translate(-this.world.camera_x, 0);
+  }
+
+  /**
+   * Draws all status bars.
+   * @private
+   */
+  _drawStatusBars() {
     this.addToCanvas(this.world.statusBar);
     this.addToCanvas(this.world.statusBarCoins);
     this.addToCanvas(this.world.statusBarBottles);
     this.addToCanvas(this.world.statusBarEndboss);
-    this.drawSubButtons();
+  }
+
+  /**
+   * Draws mobile controls if available and game is running.
+   * @private
+   */
+  _drawMobileControlsIfActive() {
     if (
       typeof this.drawMobileControls === "function" &&
       this.world.character.energy > 0
     ) {
       this.drawMobileControls();
     }
-  }
-
-  /**
-   * Draws the Game Over image and the restart button.
-   */
-  drawGameOverImage() {
-    this.world.paused = true;
-    if (!this.world.gameOverSoundPlayed && soundOn) {
-      if (typeof winAudio !== "undefined" && !winAudio.paused) {
-        winAudio.pause();
-        winAudio.currentTime = 0;
-      }
-      if (typeof gameOverAudio !== "undefined" && gameOverAudio.paused) {
-        gameOverAudio.currentTime = 0;
-        gameOverAudio.play().catch(() => {});
-      }
-      this.world.gameOverSoundPlayed = true;
-    }
-    const img = new Image();
-    img.src = "img/You won, you lost/Game over A.png";
-    const centerX = this.canvas.width / 2;
-    const centerY = this.canvas.height / 2;
-    const width = 400;
-    const height = 200;
-    img.onload = () => {
-      this._drawGameOverImage(img, centerX, centerY, width, height);
-    };
-    if (img.complete) {
-      this._drawGameOverImage(img, centerX, centerY, width, height);
-    }
-  }
-
-  /**
-   * Handles the game win sound and image display.
-   */
-  drawGameWinImage() {
-    this.world.paused = true;
-    this._handleGameWinSound();
-    this._drawGameWinImage();
   }
 
   /**
@@ -117,89 +125,10 @@ class WorldUI {
   }
 
   /**
-   * Draws the game win image on the canvas.
+   * Draws the Home button and saves its area.
    * @private
    */
-  _drawGameWinImage() {
-    if (!this.winImage) {
-      this.winImage = new Image();
-      this.winImage.src = "img/You won, you lost/You Won B.png";
-      this.winImage.onload = () =>
-        this._drawGameOverImage(
-          this.winImage,
-          this.canvas.width / 2,
-          this.canvas.height / 2,
-          400,
-          200
-        );
-    }
-    if (this.winImage.complete) {
-      this._drawGameOverImage(
-        this.winImage,
-        this.canvas.width / 2,
-        this.canvas.height / 2,
-        400,
-        200
-      );
-    }
-  }
-
-  /**
-   * Draws the Game Over image and both buttons.
-   * @private
-   * @param {HTMLImageElement} img - The image to draw.
-   * @param {number} centerX - X center of the image.
-   * @param {number} centerY - Y center of the image.
-   * @param {number} width - Width of the image.
-   * @param {number} height - Height of the image.
-   */
-  _drawGameOverImage(img, centerX, centerY, width, height) {
-    this._drawGameOverBackground(img, centerX, centerY, width, height);
-    this._drawGameOverButtons(centerX, centerY, width, height);
-  }
-
-  /**
-   * Draws the Game Over background image.
-   * @private
-   */
-  _drawGameOverBackground(img, centerX, centerY, width, height) {
-    this.ctx.save();
-    this.ctx.globalAlpha = 0.95;
-    this.ctx.drawImage(
-      img,
-      centerX - width / 2,
-      centerY - height / 2,
-      width,
-      height
-    );
-    this.ctx.restore();
-  }
-
-  /**
-   * Draws the New Game and Home buttons.
-   * @private
-   */
-  _drawGameOverButtons(centerX, centerY, width, height) {
-    const buttonWidth = 200;
-    const buttonHeight = 50;
-    const btnY = centerY + height / 2 + 40;
-
-    // New Game Button
-    const btnX = centerX - buttonWidth - 20;
-    this._drawRestartButtonRect(
-      btnX,
-      btnY,
-      buttonWidth,
-      buttonHeight,
-      btnX + buttonWidth / 2,
-      "New game"
-    );
-    this.world.restartButtonArea = {
-      x: btnX,
-      y: btnY,
-      width: buttonWidth,
-      height: buttonHeight,
-    };
+  _drawHomeButton(centerX, btnY, buttonWidth, buttonHeight) {
     const homeBtnX = centerX + 20;
     this._drawRestartButtonRect(
       homeBtnX,
@@ -227,7 +156,7 @@ class WorldUI {
     const buttonHeight = 50;
     const btnX = x - buttonWidth / 2;
     const btnY = y;
-    this._drawRestartButtonRect(btnX, btnY, buttonWidth, buttonHeight, x);
+    this.WorldUI._drawRestartButtonRect(btnX, btnY, buttonWidth, buttonHeight, x);
     this.world.restartButtonArea = {
       x: btnX,
       y: btnY,
@@ -357,12 +286,7 @@ class WorldUI {
     this.ctx.font = "20px Arial";
     this.ctx.textAlign = "left";
     let lines = [
-      "Controls:",
-      "→ or D: Move right",
-      "← or A: Move left",
-      "↑ or W or SPACE: Jump",
-      "ENTER or E: Throw bottle",
-    ];
+      "Controls:", "→ or D: Move right", "← or A: Move left", "↑ or W or SPACE: Jump", "ENTER or E: Throw bottle",];
     let y = 150;
     for (let line of lines) {
       this.ctx.fillText(line, 100, y);
@@ -380,6 +304,15 @@ class WorldUI {
     const btnHeight = 50;
     const btnX = this.canvas.width / 2 - btnWidth / 2;
     const btnY = this.canvas.height - 120;
+    this._drawCloseButtonRect(btnX, btnY, btnWidth, btnHeight);
+    this._saveTutorialCloseButtonArea(btnX, btnY, btnWidth, btnHeight);
+  }
+
+  /**
+   * Draws the close button rectangle and label.
+   * @private
+   */
+  _drawCloseButtonRect(btnX, btnY, btnWidth, btnHeight) {
     this.ctx.save();
     this.ctx.fillStyle = "#a0220a";
     this.ctx.fillRect(btnX, btnY, btnWidth, btnHeight);
@@ -392,6 +325,13 @@ class WorldUI {
     this.ctx.textBaseline = "middle";
     this.ctx.fillText("Close", this.canvas.width / 2, btnY + btnHeight / 2);
     this.ctx.restore();
+  }
+
+  /**
+   * Saves the area of the tutorial close button for hit detection.
+   * @private
+   */
+  _saveTutorialCloseButtonArea(btnX, btnY, btnWidth, btnHeight) {
     this.world.tutorialCloseButton = {
       x: btnX,
       y: btnY,

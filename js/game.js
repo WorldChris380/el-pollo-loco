@@ -57,9 +57,7 @@ function init() {
  */
 function setupMobileCanvasControls(canvas) {
   if (!isMobile()) return;
-  canvas.addEventListener("touchstart", function (e) {
-    console.log("touchstart event");
-  }, { passive: false });
+  canvas.addEventListener("touchstart", function (e) {}, { passive: false });
   canvas.addEventListener("touchstart", handleTouch, { passive: false });
   canvas.addEventListener("touchend", handleTouchEnd, { passive: false });
 }

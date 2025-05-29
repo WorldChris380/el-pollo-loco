@@ -28,10 +28,25 @@ World.prototype._setupMobileButtons = function () {
   );
 };
 
+/**
+ * Calculates the Y start position to vertically center the mobile buttons on the canvas.
+ * @param {number} h - Canvas height.
+ * @param {number} totalHeight - Total height of all mobile buttons including gaps.
+ * @returns {number} The Y coordinate to start drawing the buttons.
+ */
 World.prototype._getMobileButtonsStartY = function (h, totalHeight) {
   return (h - totalHeight) / 2;
 };
 
+/**
+ * Creates the mobile control buttons with position and label.
+ * @param {number} w - Canvas width.
+ * @param {number} startY - Y start position.
+ * @param {number} btnSize - Button size.
+ * @param {number} margin - Margin from edge.
+ * @param {number} gap - Gap between buttons.
+ * @returns {Array<Object>} Array of button objects.
+ */
 World.prototype._createMobileButtons = function (
   w,
   startY,
@@ -40,32 +55,28 @@ World.prototype._createMobileButtons = function (
   gap
 ) {
   return [
-    { key: "LEFT", x: margin, y: startY, w: btnSize, h: btnSize, label: "←" },
-    {
-      key: "ENTER",
-      x: margin,
-      y: startY + btnSize + gap,
-      w: btnSize,
-      h: btnSize,
-      label: "🧴",
-    },
-    {
-      key: "RIGHT",
-      x: w - btnSize - margin,
-      y: startY,
-      w: btnSize,
-      h: btnSize,
-      label: "→",
-    },
-    {
-      key: "UP",
-      x: w - btnSize - margin,
-      y: startY + btnSize + gap,
-      w: btnSize,
-      h: btnSize,
-      label: "⤒",
-    },
+    this._createMobileButton("LEFT", margin, startY, btnSize, "←"),
+    this._createMobileButton(
+      "ENTER", margin, startY + btnSize + gap, btnSize, "🧴"),
+    this._createMobileButton(
+      "RIGHT", w - btnSize - margin, startY, btnSize, "→"),
+    this._createMobileButton(
+      "UP", w - btnSize - margin, startY + btnSize + gap, btnSize, "⤒"),
   ];
+};
+
+/**
+ * Helper to create a single mobile button object.
+ * @param {string} key - Button key.
+ * @param {number} x - X position.
+ * @param {number} y - Y position.
+ * @param {number} size - Button size.
+ * @param {string} label - Button label.
+ * @returns {Object} Button object.
+ * @private
+ */
+World.prototype._createMobileButton = function (key, x, y, size, label) {
+  return { key, x, y, w: size, h: size, label };
 };
 
 /**
@@ -133,12 +144,7 @@ function drawTutorialOverlayText() {
   ctx.font = "20px Arial";
   ctx.textAlign = "left";
   let lines = [
-    "Steuerung:",
-    "→ oder D: Nach rechts laufen",
-    "← oder A: Nach links laufen",
-    "↑ oder W oder SPACE: Springen",
-    "ENTER oder E: Flasche werfen",
-  ];
+    "Steuerung:","→ oder D: Nach rechts laufen","← oder A: Nach links laufen","↑ oder W oder SPACE: Springen","ENTER oder E: Flasche werfen"];
   let y = 150;
   for (let line of lines) {
     ctx.fillText(line, 100, y);
@@ -185,21 +191,32 @@ function saveTutorialCloseButtonArea() {
   };
 }
 
+/**
+ * Redirects the user to the privacy policy (datenschutz) page.
+ */
 function showLegalOverlay() {
   window.location.href = "datenschutz.html";
 }
 
+/**
+ * Redirects the user to the imprint (impressum) page.
+ */
 function showImprintOverlay() {
   window.location.href = "imprint.html";
 }
 
-// Und für das Schließen-Event:
+/**
+ * Closes the legal overlay and returns to the start screen.
+ */
 function closeLegalOverlay() {
   document.getElementById("legal-overlay").style.display = "none";
   showStartButton = true;
   drawStartScreen();
 }
 
+/**
+ * Draws all mobile control buttons on the canvas.
+ */
 World.prototype.drawMobileControls = function () {
   this._setupMobileButtons();
   this.mobileButtons.forEach((btn) => this._drawMobileButton(btn));

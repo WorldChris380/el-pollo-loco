@@ -38,7 +38,7 @@ class World {
     this.background = this.level.background;
     this.clouds = this.level.clouds;
     this.enemies = this.level.enemies;
-    this.ui = new WorldUI(this); // <--- WorldUI Instanz
+    this.ui = new WorldUI(this);
     this.setWorld();
     this.run();
     this.createBottlesOnGround();
@@ -46,14 +46,11 @@ class World {
     this.mobileButtons = [];
     this.endboss = new Endboss(this);
     this.level.enemies.push(this.endboss);
-
-    // Setze world-Referenz für alle Enemies
     this.level.enemies.forEach((enemy) => {
       enemy.world = this;
     });
-
     this.drawLoop();
-    this.draw(); // immer zeichnen, auch wenn pausiert!
+    this.draw();
     requestAnimationFrame(() => this.drawLoop());
   }
 
@@ -82,23 +79,42 @@ class World {
    */
   checkThrowObjects() {
     const now = Date.now();
-    if (
+    if (this._canThrowBottle(now)) {
+      this._throwBottle(now);
+    }
+  }
+
+  /**
+   * Checks if the conditions to throw a bottle are met.
+   * @private
+   * @param {number} now - Current timestamp.
+   * @returns {boolean}
+   */
+  _canThrowBottle(now) {
+    return (
       this.keyboard.ENTER &&
       this.collectedBottles > 0 &&
       (!this.lastThrowTime || now - this.lastThrowTime > 300)
-    ) {
-      this.collectedBottles--;
-      this.statusBarBottles.setAmount(this.collectedBottles);
-      let offsetX = this.character.otherDirection ? -50 : 50;
-      let bottle = new ThrowableObject(
-        this.character.x + offsetX,
-        this.character.y + this.character.height - 70,
-        this.character.otherDirection,
-        this
-      );
-      this.throwableObjects.push(bottle);
-      this.lastThrowTime = now;
-    }
+    );
+  }
+
+  /**
+   * Handles the logic for throwing a bottle.
+   * @private
+   * @param {number} now - Current timestamp.
+   */
+  _throwBottle(now) {
+    this.collectedBottles--;
+    this.statusBarBottles.setAmount(this.collectedBottles);
+    let offsetX = this.character.otherDirection ? -50 : 50;
+    let bottle = new ThrowableObject(
+      this.character.x + offsetX,
+      this.character.y + this.character.height - 70,
+      this.character.otherDirection,
+      this
+    );
+    this.throwableObjects.push(bottle);
+    this.lastThrowTime = now;
   }
 
   /**
@@ -250,7 +266,7 @@ class World {
    * Starts the animation loop for drawing the world.
    */
   drawLoop() {
-    this.draw(); // immer zeichnen, damit Overlays sichtbar bleiben
+    this.draw();
     requestAnimationFrame(() => this.drawLoop());
   }
 
@@ -269,7 +285,7 @@ class World {
       isMobile() &&
       typeof this.world.drawMobileControls === "function" &&
       this.world.character.energy > 0 &&
-      !(this.world.endboss && this.world.endboss.isDead) // Endscreen: keine Buttons!
+      !(this.world.endboss && this.world.endboss.isDead)
     ) {
       this.world.drawMobileControls();
     }

@@ -31,26 +31,46 @@ class YellowChicken extends MoveableObject {
    * Animates the chicken (walking, animation, and random jumps).
    */
   animate() {
+    this._startWalkingInterval();
+    this._startAnimationInterval();
+    this._startRandomJump();
+  }
+
+  /**
+   * Starts the interval for walking left.
+   * @private
+   */
+  _startWalkingInterval() {
     setInterval(() => {
       if (!this.isDead && this.world && !this.world.paused) {
         this.moveLeft();
       }
     }, 1000 / 60);
+  }
 
+  /**
+   * Starts the interval for walking animation.
+   * @private
+   */
+  _startAnimationInterval() {
     setInterval(() => {
       if (!this.isDead && this.world && !this.world.paused) {
         this.playAnimation(this.IMAGES_WALKING);
       }
     }, 200);
+  }
 
-    // Zufälliges Springen mit rekursivem Timeout
+  /**
+   * Starts the random jump logic.
+   * @private
+   */
+  _startRandomJump() {
     const randomJump = () => {
       if (!this.isDead && this.world && !this.world.paused && this.y >= 355) {
-        if (Math.random() < 0.5) { // 50% Chance pro Versuch
+        if (Math.random() < 0.5) {
           this.jumpShort();
         }
       }
-      // Nächstes Springen nach 0,7–1,5 Sekunden
       setTimeout(randomJump, 700 + Math.random() * 800);
     };
     randomJump();
@@ -64,6 +84,14 @@ class YellowChicken extends MoveableObject {
     let jumpHeight = 20;
     let jumpUp = true;
     let jumpStep = 2;
+    this._performJump(startY, jumpHeight, jumpUp, jumpStep);
+  }
+
+  /**
+   * Handles the jump movement.
+   * @private
+   */
+  _performJump(startY, jumpHeight, jumpUp, jumpStep) {
     let interval = setInterval(() => {
       if (jumpUp) {
         this.y -= jumpStep;

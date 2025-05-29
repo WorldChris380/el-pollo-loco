@@ -51,15 +51,39 @@ class Endboss extends MoveableObject {
   }
 
   /**
-   * Reduces the endboss's energy when hit.
+   * Reduces the endboss's energy when hit and handles sound.
    */
   hit() {
     if (this.isDead) return;
+    this._reduceEnergy();
+    this._handleDeath();
+    this._playHitSound();
+  }
+
+  /**
+   * Reduces the endboss's energy.
+   * @private
+   */
+  _reduceEnergy() {
     this.energy -= 25;
-    if (this.energy < 0) {
-      this.energy = 0;
+    if (this.energy < 0) this.energy = 0;
+  }
+
+  /**
+   * Handles the death state if energy is depleted.
+   * @private
+   */
+  _handleDeath() {
+    if (this.energy === 0) {
       this.isDead = true;
     }
+  }
+
+  /**
+   * Plays the hit sound if conditions are met.
+   * @private
+   */
+  _playHitSound() {
     const now = Date.now();
     if (
       soundOn &&
@@ -106,25 +130,62 @@ class Endboss extends MoveableObject {
    * Animates the endboss (walking, attacking, dying).
    */
   animate() {
-    let i = 0;
-    setInterval(() => {
-      if (this.isDead) {
-        this.stopEndbossWalk();
-        return;
-      }
-      if (
-        this.isInViewport() &&
-        (this.world.character.x > 1000 || this.hadFirstContact)
-      ) {
-        this.hadFirstContact = true;
-        this.moveEndbossLeft();
-        this.playAnimation(this.IMAGES_ATTACK);
-      } else {
-        this.stopEndbossWalk();
-        this.playAnimation(this.IMAGES_WALKING);
-      }
-      i++;
-    }, 200);
+    setInterval(() => this._animateStep(), 200);
+  }
+
+  /**
+   * Handles a single animation step for the endboss.
+   * @private
+   */
+  _animateStep() {
+    if (this.isDead) {
+      this._handleDeadState();
+      return;
+    }
+    if (this._shouldAttack()) {
+      this._handleAttackState();
+    } else {
+      this._handleWalkingState();
+    }
+  }
+
+  /**
+   * Handles the dead state of the endboss.
+   * @private
+   */
+  _handleDeadState() {
+    this.stopEndbossWalk();
+  }
+
+  /**
+   * Determines if the endboss should attack.
+   * @returns {boolean}
+   * @private
+   */
+  _shouldAttack() {
+    return (
+      this.isInViewport() &&
+      (this.world.character.x > 1000 || this.hadFirstContact)
+    );
+  }
+
+  /**
+   * Handles the attack state of the endboss.
+   * @private
+   */
+  _handleAttackState() {
+    this.hadFirstContact = true;
+    this.moveEndbossLeft();
+    this.playAnimation(this.IMAGES_ATTACK);
+  }
+
+  /**
+   * Handles the walking state of the endboss.
+   * @private
+   */
+  _handleWalkingState() {
+    this.stopEndbossWalk();
+    this.playAnimation(this.IMAGES_WALKING);
   }
 
   /**

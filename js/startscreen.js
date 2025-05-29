@@ -1,12 +1,9 @@
 let mousePos = { x: 0, y: 0 };
-
-// Bild nur einmal laden!
 let startScreenImg = new Image();
 let startScreenImgLoaded = false;
 startScreenImg.src = "img/9_intro_outro_screens/start/startscreen_1.png";
 startScreenImg.onload = function () {
   startScreenImgLoaded = true;
-  // Nur zeichnen, wenn ctx schon existiert!
   if (typeof ctx !== "undefined" && ctx) {
     drawStartScreen();
   }
@@ -25,13 +22,39 @@ function drawStartScreen() {
 }
 
 /**
- * Draws the start button on the canvas.
+ * Draws the start button on the canvas and saves its area.
  */
 function drawStartButton() {
   const btnWidth = 260;
   const btnHeight = 60;
-  const btnX = canvas.width / 2 - btnWidth / 2;
-  const btnY = 40;
+  const btnX = getStartButtonX(btnWidth);
+  const btnY = getStartButtonY();
+  drawStartButtonRect(btnX, btnY, btnWidth, btnHeight);
+  drawStartButtonLabel(btnX, btnY, btnWidth, btnHeight);
+  saveStartButtonArea(btnX, btnY, btnWidth, btnHeight);
+}
+
+/**
+ * Calculates the X position for the start button.
+ * @private
+ */
+function getStartButtonX(btnWidth) {
+  return canvas.width / 2 - btnWidth / 2;
+}
+
+/**
+ * Calculates the Y position for the start button.
+ * @private
+ */
+function getStartButtonY() {
+  return 40;
+}
+
+/**
+ * Draws the start button rectangle.
+ * @private
+ */
+function drawStartButtonRect(btnX, btnY, btnWidth, btnHeight) {
   ctx.save();
   ctx.globalAlpha = 0.95;
   ctx.fillStyle = "#a0220a";
@@ -39,12 +62,28 @@ function drawStartButton() {
   ctx.strokeStyle = "#fff";
   ctx.lineWidth = 3;
   ctx.strokeRect(btnX, btnY, btnWidth, btnHeight);
+  ctx.restore();
+}
+
+/**
+ * Draws the start button label.
+ * @private
+ */
+function drawStartButtonLabel(btnX, btnY, btnWidth, btnHeight) {
+  ctx.save();
   ctx.fillStyle = "#fff";
   ctx.font = "bold 32px Arial";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText("Start game", canvas.width / 2, btnY + btnHeight / 2);
+  ctx.fillText("Start game", btnX + btnWidth / 2, btnY + btnHeight / 2);
   ctx.restore();
+}
+
+/**
+ * Saves the start button area for hit detection.
+ * @private
+ */
+function saveStartButtonArea(btnX, btnY, btnWidth, btnHeight) {
   startButtonArea = { x: btnX, y: btnY, width: btnWidth, height: btnHeight };
 }
 
@@ -90,29 +129,53 @@ function getStartSubButtonConfigs() {
  */
 function drawSingleStartSubButton(btn, i, startX, y, buttonWidth, gap) {
   const x = startX + i * (buttonWidth + gap);
-  let isHover =
-    mousePos.x >= x &&
-    mousePos.x <= x + buttonWidth &&
-    mousePos.y >= y &&
-    mousePos.y <= y + 40;
+  const isHover = isMouseOverButton(x, y, buttonWidth, 40);
+  drawStartSubButtonRect(x, y, buttonWidth, 40, isHover, btn.label);
+  saveStartSubButtonArea(x, y, buttonWidth, 40, btn.key);
+}
 
+/**
+ * Checks if the mouse is over the button.
+ * @private
+ */
+function isMouseOverButton(x, y, width, height) {
+  return (
+    mousePos.x >= x &&
+    mousePos.x <= x + width &&
+    mousePos.y >= y &&
+    mousePos.y <= y + height
+  );
+}
+
+/**
+ * Draws the button rectangle and label.
+ * @private
+ */
+function drawStartSubButtonRect(x, y, width, height, isHover, label) {
   ctx.save();
   ctx.fillStyle = isHover
-    ? "rgba(200,60,10,0.95)" // Hover-Farbe
+    ? "rgba(200,60,10,0.95)"
     : "rgba(160,34,10,0.9)";
-  ctx.fillRect(x, y, buttonWidth, 40);
+  ctx.fillRect(x, y, width, height);
   ctx.fillStyle = "white";
   ctx.font = "20px Arial";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(btn.label, x + buttonWidth / 2, y + 20);
+  ctx.fillText(label, x + width / 2, y + height / 2);
   ctx.restore();
+}
+
+/**
+ * Saves the button area for hit detection.
+ * @private
+ */
+function saveStartSubButtonArea(x, y, width, height, key) {
   startSubButtonAreas.push({
     x,
     y,
-    width: buttonWidth,
-    height: 40,
-    key: btn.key,
+    width,
+    height,
+    key,
   });
 }
 
@@ -122,26 +185,68 @@ function drawSingleStartSubButton(btn, i, startX, y, buttonWidth, gap) {
  * @param {Object} btn - The button object containing key and other properties.
  */
 function handleStartSubButton(btn) {
-  if (btn.key === "tutorial") {
-    showStartButton = false;
-    showTutorialOverlay();
+  switch (btn.key) {
+    case "tutorial":
+      handleTutorialButton();
+      break;
+    case "legal":
+      handleLegalButton();
+      break;
+    case "imprint":
+      handleImprintButton();
+      break;
+    case "sound":
+      handleSoundButton();
+      break;
+    case "fullscreen":
+      handleFullscreenButton();
+      break;
   }
-  if (btn.key === "legal") {
-    showStartButton = false;
-    showLegalOverlay();
-  }
-  if (btn.key === "imprint") {
-    showStartButton = false;
-    showImprintOverlay();
-  }
-  if (btn.key === "sound") {
-    soundOn = !soundOn;
-    handleSoundToggle();
-    drawStartScreen();
-  }
-  if (btn.key === "fullscreen") {
-    toggleFullscreen(canvas);
-  }
+}
+
+/**
+ * Handles the tutorial button action.
+ * @private
+ */
+function handleTutorialButton() {
+  showStartButton = false;
+  showTutorialOverlay();
+}
+
+/**
+ * Handles the legal button action.
+ * @private
+ */
+function handleLegalButton() {
+  showStartButton = false;
+  showLegalOverlay();
+}
+
+/**
+ * Handles the imprint button action.
+ * @private
+ */
+function handleImprintButton() {
+  showStartButton = false;
+  showImprintOverlay();
+}
+
+/**
+ * Handles the sound button action.
+ * @private
+ */
+function handleSoundButton() {
+  soundOn = !soundOn;
+  handleSoundToggle();
+  drawStartScreen();
+}
+
+/**
+ * Handles the fullscreen button action.
+ * @private
+ */
+function handleFullscreenButton() {
+  toggleFullscreen(canvas);
 }
 
 /**
@@ -155,6 +260,9 @@ window.onload = function () {
   addCanvasMousemoveListener();
 };
 
+/**
+ * Adds a mousemove event listener to the canvas to handle hover effects.
+ */
 function addCanvasMousemoveListener() {
   canvas.addEventListener("mousemove", handleCanvasMousemove);
 }

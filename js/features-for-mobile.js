@@ -1,33 +1,31 @@
 /**
- * Handles touch events for mobile controls and restart button.
+ * Handles touch events for mobile controls and buttons.
  * @param {TouchEvent} e
  */
 function handleTouch(e) {
   if (e.cancelable) e.preventDefault();
   if (!world) return;
   for (let touch of e.touches) {
-    const rect = canvas.getBoundingClientRect();
-    const x = ((touch.clientX - rect.left) / rect.width) * canvas.width;
-    const y = ((touch.clientY - rect.top) / rect.height) * canvas.height;
-
-    // 1. Mobile Steuerung zuerst prüfen!
-    if (handleMobileButtonTouch(x, y)) return;
-
-    // 2. Dann Home/Restart/Tutorial prüfen
-    if (checkHomeButton(x, y)) return;
-    if (checkRestartButton(x, y)) return;
-    if (checkTutorialClose(x, y)) return;
-
-    // 3. SubButtons (Sound, Fullscreen, etc.)
-    if (handleSubButtonsTouch(x, y)) return;
-    if (
-      typeof isFullscreenButton === "function" &&
-      isFullscreenButton(x, y, canvas)
-    ) {
-      toggleFullscreen(canvas);
-      return;
-    }
+    const { x, y } = getTouchPosition(touch);
+    if (processTouch(x, y)) return;
   }
+}
+
+/**
+ * Processes a single touch position for all button types.
+ * @param {number} x
+ * @param {number} y
+ * @returns {boolean} True if a button was handled.
+ * @private
+ */
+function processTouch(x, y) {
+  if (handleMobileButtonTouch(x, y)) return true;
+  if (checkHomeButton(x, y)) return true;
+  if (checkRestartButton(x, y)) return true;
+  if (checkTutorialClose(x, y)) return true;
+  if (handleSubButtonsTouch(x, y)) return true;
+  if (isFullscreenTouch(x, y)) return true;
+  return false;
 }
 
 /**
@@ -89,43 +87,12 @@ function handleRestartButtonTouch(x, y) {
 function handleSubButtonsTouchInGame(x, y) {
   if (world && world.subButtonAreas) {
     for (const btn of world.subButtonAreas) {
-      if (
-        x >= btn.x &&
-        x <= btn.x + btn.width &&
-        y >= btn.y &&
-        y <= btn.y + btn.height
-      ) {
-        if (btn.key === "tutorial") world.showTutorial = true;
-        if (btn.key === "legal") window.location.href = "datenschutz.html";
-        if (btn.key === "sound") {
-          soundOn = !soundOn;
-          handleSoundToggle();
-        }
-        if (btn.key === "fullscreen") toggleFullscreen(canvas);
-        return true;
+      if (isTouchOnButton(x, y, btn)) {
+        return handleSubButtonAction(btn);
       }
     }
   }
   return false;
-}
-
-/**
- * Checks mobile control buttons on touch.
- * @param {number} x - X coordinate.
- * @param {number} y - Y coordinate.
- * @returns {boolean}
- * @private
- */
-function handleMobileButtons(x, y) {
-  let hit = false;
-  world.mobileButtons.forEach((btn) => {
-    if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
-      world.pressedButtons[btn.key] = true;
-      keyboard[btn.key] = true;
-      hit = true;
-    }
-  });
-  return hit;
 }
 
 /**
@@ -138,25 +105,65 @@ function handleMobileButtons(x, y) {
 function handleSubButtonsTouch(x, y) {
   if (world.subButtonAreas) {
     for (const btn of world.subButtonAreas) {
-      if (
-        x >= btn.x &&
-        x <= btn.x + btn.width &&
-        y >= btn.y &&
-        y <= btn.y + btn.height
-      ) {
-        if (btn.key === "tutorial") {
-          world.showTutorial = true;
-          world.pause();
-        }
-        if (btn.key === "legal") window.location.href = "datenschutz.html";
-        if (btn.key === "sound") {
-          soundOn = !soundOn;
-          handleSoundToggle();
-        }
-        if (btn.key === "fullscreen") toggleFullscreen(canvas);
-        return true;
+      if (isTouchOnButton(x, y, btn)) {
+        return handleSingleSubButton(btn);
       }
     }
+  }
+  return false;
+}
+
+/**
+ * Checks if the touch is within the button area.
+ * @param {number} x
+ * @param {number} y
+ * @param {Object} btn
+ * @returns {boolean}
+ * @private
+ */
+function isTouchOnButton(x, y, btn) {
+  return (
+    x >= btn.x &&
+    x <= btn.x + btn.width &&
+    y >= btn.y &&
+    y <= btn.y + btn.height
+  );
+}
+
+/**
+ * Handles the action for a touched sub button.
+ * @param {Object} btn
+ * @returns {boolean}
+ * @private
+ */
+function handleSingleSubButton(btn) {
+  if (btn.key === "tutorial") {
+    world.showTutorial = true;
+    if (typeof world.pause === "function") world.pause();
+  }
+  if (btn.key === "legal") window.location.href = "datenschutz.html";
+  if (btn.key === "sound") {
+    soundOn = !soundOn;
+    handleSoundToggle();
+  }
+  if (btn.key === "fullscreen") toggleFullscreen(canvas);
+  return true;
+}
+
+/**
+ * Checks if the fullscreen button was touched and toggles fullscreen.
+ * @param {number} x
+ * @param {number} y
+ * @returns {boolean}
+ * @private
+ */
+function isFullscreenTouch(x, y) {
+  if (
+    typeof isFullscreenButton === "function" &&
+    isFullscreenButton(x, y, canvas)
+  ) {
+    toggleFullscreen(canvas);
+    return true;
   }
   return false;
 }

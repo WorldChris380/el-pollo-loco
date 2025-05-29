@@ -4,12 +4,33 @@ window.CharacterAnimations = {
    * @param {number} now - Current timestamp.
    */
   handleJumpAnimation(now) {
+    this._startJumpIfNeeded(now);
+    this._switchJumpPhaseIfNeeded(now);
+    this._advanceJumpFrameIfNeeded(now);
+    if (!this.isAboveGround()) this.finishJumpAnimation();
+    this.isSleeping = false;
+  },
+
+  /**
+   * Starts jump if not already active.
+   * @param {number} now - Current timestamp.
+   * @private
+   */
+  _startJumpIfNeeded(now) {
     if (!this.jumpAnimActive && this.jumpAnimFrame === 0) {
       this.jumpPhase = "up";
       this.jumpAnimActive = true;
       this.lastJumpAnimTime = now;
       this.jumpAnimFrame = 0;
     }
+  },
+
+  /**
+   * Switches jump phase from up to down if needed.
+   * @param {number} now - Current timestamp.
+   * @private
+   */
+  _switchJumpPhaseIfNeeded(now) {
     if (
       this.jumpPhase === "up" &&
       (this.speedY <= 0 || this.jumpAnimFrame >= this.IMAGES_JUMPING_UP.length)
@@ -18,13 +39,19 @@ window.CharacterAnimations = {
       this.jumpAnimFrame = 0;
       this.lastJumpAnimTime = now;
     }
+  },
+
+  /**
+   * Advances jump frame if needed.
+   * @param {number} now - Current timestamp.
+   * @private
+   */
+  _advanceJumpFrameIfNeeded(now) {
     if (this.shouldAdvanceJumpFrame(now)) {
       if (this.jumpPhase === "up") this.setJumpUpFrame();
       else if (this.jumpPhase === "down") this.setJumpFallingFrame();
       this.lastJumpAnimTime = now;
     }
-    if (!this.isAboveGround()) this.finishJumpAnimation();
-    this.isSleeping = false;
   },
 
   /**
@@ -46,7 +73,8 @@ window.CharacterAnimations = {
   },
 
   /**
-   * Handles movement logic.
+   * Handles movement logic for the character.
+   * Delegates to helper functions for moving and stopping.
    * @private
    */
   handleMovement() {
@@ -58,20 +86,36 @@ window.CharacterAnimations = {
       (this.world.keyboard.RIGHT && this.x < maxRight) ||
       (this.world.keyboard.LEFT && this.x > 0)
     ) {
-      if (!this.isWalking) this.playWalkSound();
-      if (this.world.keyboard.RIGHT) {
-        this.moveRight();
-        this.otherDirection = false;
-      }
-      if (this.world.keyboard.LEFT) {
-        this.moveLeft();
-        this.otherDirection = true;
-      }
-      this.lastActionTime = Date.now();
-      this.isSleeping = false;
+      this._moveCharacter();
     } else {
-      this.stopWalkSound();
+      this._stopCharacter();
     }
+  },
+
+  /**
+   * Moves the character left or right and updates state.
+   * @private
+   */
+  _moveCharacter() {
+    if (!this.isWalking) this.playWalkSound();
+    if (this.world.keyboard.RIGHT) {
+      this.moveRight();
+      this.otherDirection = false;
+    }
+    if (this.world.keyboard.LEFT) {
+      this.moveLeft();
+      this.otherDirection = true;
+    }
+    this.lastActionTime = Date.now();
+    this.isSleeping = false;
+  },
+
+  /**
+   * Stops the character and stops walk sound.
+   * @private
+   */
+  _stopCharacter() {
+    this.stopWalkSound();
   },
 
   /**
@@ -116,6 +160,9 @@ window.CharacterAnimations = {
     this.jumpAnimFrame++;
   },
 
+  /**
+   * Finishes the jump animation by resetting state.
+   */
   finishJumpAnimation() {
     this.jumpAnimActive = false;
     this.jumpAnimFrame = 0;
@@ -212,3 +259,4 @@ window.CharacterAnimations = {
     }
   },
 };
+Object.assign(Character.prototype, window.CharacterAnimations);

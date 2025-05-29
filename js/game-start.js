@@ -199,6 +199,10 @@ function isHoveringStartButton(mouseX, mouseY) {
   );
 }
 
+/**
+ * Initializes the game when the window has fully loaded.
+ * Sets up the canvas, context, draws the start screen, and adds mousemove event for button hover effects.
+ */
 window.addEventListener("load", function () {
   canvas = document.getElementById("canvas");
   ctx = canvas.getContext("2d");
