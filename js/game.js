@@ -285,7 +285,7 @@ function isMobile() {
       navigator.maxTouchPoints &&
       navigator.maxTouchPoints > 1) ||
     typeof window.orientation !== "undefined" ||
-    (window.innerWidth <= 1024 && "ontouchstart" in window)
+    (window.innerWidth <= 1400 && "ontouchstart" in window)
   );
 }
 
